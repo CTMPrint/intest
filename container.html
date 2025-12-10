@@ -1,0 +1,3633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceylon Tea Loading System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #818cf8;
+            --indigo-dark: #3730a3;
+            --green: #10b981;
+            --green-light: #34d399;
+            --green-dark: #059669;
+            --orange: #f59e0b;
+            --orange-light: #fbbf24;
+            --orange-dark: #d97706;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --blue-dark: #1d4ed8;
+            --purple: #8b5cf6;
+            --purple-light: #a78bfa;
+            --purple-dark: #7c3aed;
+            --red: #ef4444;
+            --red-light: #f87171;
+            --red-dark: #dc2626;
+            --gray-light: #f9fafb;
+            --gray: #e5e7eb;
+            --gray-dark: #6b7280;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--white);
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            border-bottom: 1px solid var(--gray);
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            color: var(--indigo);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--indigo-dark);
+            background: linear-gradient(90deg, var(--indigo) 0%, var(--green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: var(--transition);
+            animation: fadeIn 0.8s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--indigo-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--indigo);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--indigo-dark);
+            margin: 25px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .select-container, .input-container {
+            position: relative;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--white);
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--indigo);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .unit-selector {
+            display: flex;
+            margin-bottom: 15px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--gray);
+        }
+
+        .unit-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background-color: var(--white);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .unit-option.active {
+            background-color: var(--indigo);
+            color: var(--white);
+        }
+
+        .dimension-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .dimension-box {
+            text-align: center;
+        }
+
+        .dimension-box label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-dark);
+        }
+
+        .dimension-box i {
+            font-size: 1.2rem;
+            color: var(--indigo);
+            margin-bottom: 5px;
+        }
+
+        .spacing-controls {
+            background-color: var(--gray-light);
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-top: 20px;
+            border-left: 4px solid var(--blue);
+        }
+
+        .spacing-controls h4 {
+            color: var(--blue-dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spacing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .spacing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pallet-mc-container {
+            margin-top: 20px;
+        }
+
+        .pallet-mc-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .pallet-mc-item {
+            background-color: var(--gray-light);
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInRight 0.5s ease;
+        }
+
+        .pallet-item {
+            border-left: 4px solid var(--orange);
+        }
+
+        .mc-item {
+            border-left: 4px solid var(--purple);
+        }
+
+        .pallet-mc-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .pallet-mc-name {
+            font-weight: 600;
+            color: var(--indigo-dark);
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .pallet-mc-dimensions {
+            font-weight: 500;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .pallet-mc-spacing {
+            font-size: 0.85rem;
+            color: var(--blue);
+            margin-top: 3px;
+        }
+
+        .remove-pallet-mc {
+            background-color: transparent;
+            border: none;
+            color: var(--red);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            margin-left: 15px;
+        }
+
+        .remove-pallet-mc:hover {
+            color: var(--red-dark);
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--indigo);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--indigo-dark);
+        }
+
+        .btn-success {
+            background-color: var(--green);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background-color: var(--green-dark);
+        }
+
+        .btn-orange {
+            background-color: var(--orange);
+            color: var(--white);
+        }
+
+        .btn-orange:hover {
+            background-color: var(--orange-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--red);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--red-dark);
+        }
+
+        .btn-purple {
+            background-color: var(--purple);
+            color: var(--white);
+        }
+
+        .btn-purple:hover {
+            background-color: var(--purple-dark);
+        }
+
+        .btn-blue {
+            background-color: var(--blue);
+            color: var(--white);
+        }
+
+        .btn-blue:hover {
+            background-color: var(--blue-dark);
+        }
+
+        .add-box-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .box-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .box-actions button {
+            flex: 1;
+        }
+
+        .pallet-mc-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .pallet-mc-actions button {
+            flex: 1;
+        }
+
+        .export-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .export-actions button {
+            flex: 1;
+        }
+
+        .boxes-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .box-item {
+            background-color: var(--gray-light);
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInRight 0.5s ease;
+        }
+
+        .box-item:nth-child(odd) {
+            border-left: 4px solid var(--green);
+        }
+
+        .box-item:nth-child(even) {
+            border-left: 4px solid var(--blue);
+        }
+
+        .box-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .box-name {
+            font-weight: 600;
+            color: var(--indigo-dark);
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .box-dimensions {
+            font-weight: 500;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .box-count {
+            font-size: 0.85rem;
+            color: var(--gray-dark);
+            margin-top: 3px;
+        }
+
+        .box-quantity {
+            font-size: 0.85rem;
+            color: var(--indigo);
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        .box-spacing {
+            font-size: 0.85rem;
+            color: var(--blue);
+            margin-top: 3px;
+        }
+
+        .remove-box {
+            background-color: transparent;
+            border: none;
+            color: var(--red);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            margin-left: 15px;
+        }
+
+        .remove-box:hover {
+            color: var(--red-dark);
+        }
+
+        .results-container {
+            margin-top: 30px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background-color: var(--gray-light);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .result-card:nth-child(1) {
+            border-top: 4px solid var(--indigo);
+        }
+
+        .result-card:nth-child(2) {
+            border-top: 4px solid var(--green);
+        }
+
+        .result-card:nth-child(3) {
+            border-top: 4px solid var(--orange);
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+
+        .visualization-container {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: var(--gray-light);
+            border-radius: var(--radius);
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-visualization {
+            width: 100%;
+            height: 320px;
+            position: relative;
+            background-color: rgba(79, 70, 229, 0.05);
+            border: 2px dashed rgba(79, 70, 229, 0.3);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .container-outline {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid var(--indigo);
+            border-radius: 4px;
+        }
+
+        .loaded-box {
+            position: absolute;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: rgba(0, 0, 0, 0.7);
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .loaded-box:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .spacing-visual {
+            position: absolute;
+            background-color: rgba(59, 130, 246, 0.3);
+            border: 1px dashed rgba(59, 130, 246, 0.5);
+        }
+
+        .loading-animation {
+            text-align: center;
+            padding: 40px 0;
+            display: none;
+        }
+
+        .loading-animation.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--gray);
+            border-top-color: var(--indigo);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .legend-color.container {
+            background-color: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+        }
+
+        .legend-color.boxes {
+            background-color: var(--green);
+            border: 1px solid var(--green-dark);
+        }
+
+        .legend-color.spacing {
+            background-color: rgba(59, 130, 246, 0.3);
+            border: 1px dashed rgba(59, 130, 246, 0.5);
+        }
+
+        .loading-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .loading-step {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            background-color: var(--gray-light);
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .loading-step.active {
+            background-color: var(--indigo);
+            color: white;
+        }
+
+        .loading-step:hover:not(.active) {
+            background-color: var(--gray);
+        }
+
+        .visualization-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(16, 185, 129, 0.1);
+            border-radius: var(--radius);
+            border-left: 4px solid var(--green);
+            font-size: 0.9rem;
+        }
+
+        .pallet-mc-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pallet-result, .mc-result {
+            background-color: var(--gray-light);
+            padding: 20px;
+            border-radius: var(--radius);
+        }
+
+        .pallet-result {
+            border-left: 4px solid var(--orange);
+        }
+
+        .mc-result {
+            border-left: 4px solid var(--purple);
+        }
+
+        .pallet-result h4, .mc-result h4 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .result-detail:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: var(--gray-dark);
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--indigo-dark);
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--gray-light);
+            border-radius: var(--radius);
+            border-left: 4px solid var(--indigo);
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: var(--indigo-dark);
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-top: 1px solid var(--gray);
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: slideUp 0.4s ease;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            color: var(--indigo-dark);
+            font-size: 1.3rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-dark);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--red);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--indigo);
+            border-bottom-color: var(--indigo);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from { 
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes boxLoad {
+            0% { 
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--indigo-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--indigo);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-shipping-fast logo-icon"></i>
+                <h1>Ceylon Tea Loading System</h1>
+            </div>
+            <p class="subtitle">Advanced container loading with Pallet/MC management and spacing controls</p>
+        </header>
+
+        <div class="main-content">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-cube"></i> Container & Box Details</h2>
+                
+                <div class="form-group">
+                    <label for="container-select">Select Container Type</label>
+                    <div class="select-container">
+                        <select id="container-select">
+                            <option value="20std">20' Standard Container (20' x 8' x 8'6")</option>
+                            <option value="40std" selected>40' Standard Container (40' x 8' x 8'6")</option>
+                            <option value="40hc">40' High Cube Container (40' x 8' x 9'6")</option>
+                            <option value="20ref">20' Refrigerated Container (20' x 8' x 8'6")</option>
+                            <option value="40ref">40' Refrigerated Container (40' x 8' x 8'6")</option>
+                            <option value="45hc">45' High Cube Container (45' x 8' x 9'6")</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Container Dimensions</label>
+                    <div id="container-dimensions" class="dimension-inputs">
+                        <!-- Container dimensions will be auto-populated here -->
+                    </div>
+                </div>
+
+                <h3 class="section-title"><i class="fas fa-box"></i> Box Dimensions</h3>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="box-tab">Box Details</div>
+                    <div class="tab" data-tab="spacing-tab">Spacing Controls</div>
+                </div>
+
+                <div class="tab-content active" id="box-tab">
+                    <div class="form-group">
+                        <label>Measurement Unit</label>
+                        <div class="unit-selector">
+                            <div class="unit-option active" data-unit="cm">Centimeters (cm)</div>
+                            <div class="unit-option" data-unit="m">Meters (m)</div>
+                            <div class="unit-option" data-unit="in">Inches (in)</div>
+                        </div>
+                        
+                        <div class="dimension-inputs">
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                    Length
+                                    <input type="number" id="box-length" placeholder="0" min="1" value="30">
+                                </label>
+                            </div>
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    Width
+                                    <input type="number" id="box-width" placeholder="0" min="1" value="20">
+                                </label>
+                            </div>
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    Height
+                                    <input type="number" id="box-height" placeholder="0" min="1" value="15">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="box-name">Box Name / Description</label>
+                        <input type="text" id="box-name" placeholder="e.g., Premium Tea Box 250g">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="box-quantity">Available Quantity</label>
+                        <input type="number" id="box-quantity" placeholder="Number of boxes available" min="1" value="100">
+                    </div>
+
+                    <div class="box-actions">
+                        <button id="add-box-btn" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Add Box
+                        </button>
+                        <button id="remove-all-boxes-btn" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> Remove All
+                        </button>
+                    </div>
+
+                    <div class="boxes-list" id="boxes-list">
+                        <!-- Box items will be added here dynamically -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="spacing-tab">
+                    <div class="spacing-controls">
+                        <h4><i class="fas fa-ruler-combined"></i> Box Spacing Configuration</h4>
+                        <div class="spacing-grid">
+                            <div>
+                                <label for="spacing-length">Length Spacing (cm)</label>
+                                <input type="number" id="spacing-length" placeholder="Spacing between boxes lengthwise" min="0" value="2">
+                            </div>
+                            <div>
+                                <label for="spacing-width">Width Spacing (cm)</label>
+                                <input type="number" id="spacing-width" placeholder="Spacing between boxes widthwise" min="0" value="2">
+                            </div>
+                            <div>
+                                <label for="spacing-height">Height Spacing (cm)</label>
+                                <input type="number" id="spacing-height" placeholder="Spacing between boxes vertically" min="0" value="2">
+                            </div>
+                            <div>
+                                <label for="spacing-wall">Wall Clearance (cm)</label>
+                                <input type="number" id="spacing-wall" placeholder="Space from container walls" min="0" value="5">
+                            </div>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--gray-dark); margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> Spacing reduces the number of boxes that fit but improves safety and ventilation
+                        </p>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button id="apply-spacing-btn" class="btn btn-blue" style="width: 100%;">
+                            <i class="fas fa-check-circle"></i> Apply Spacing to All Boxes
+                        </button>
+                    </div>
+                </div>
+
+                <h3 class="section-title"><i class="fas fa-pallet"></i> Pallet & Master Carton Management</h3>
+                
+                <div class="pallet-mc-container">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="pallet-tab">Add Pallet</div>
+                        <div class="tab" data-tab="mc-tab">Add Master Carton</div>
+                        <div class="tab" data-tab="manage-tab">Manage</div>
+                    </div>
+
+                    <div class="tab-content active" id="pallet-tab">
+                        <div class="dimension-inputs">
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                    Length
+                                    <input type="number" id="pallet-length" placeholder="Length" value="120">
+                                </label>
+                            </div>
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    Width
+                                    <input type="number" id="pallet-width" placeholder="Width" value="100">
+                                </label>
+                            </div>
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    Height
+                                    <input type="number" id="pallet-height" placeholder="Height" value="15">
+                                </label>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label for="pallet-name">Pallet Name (Optional)</label>
+                            <input type="text" id="pallet-name" placeholder="e.g., Standard Euro Pallet">
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label for="pallet-max-boxes">Max Boxes per Pallet</label>
+                            <input type="number" id="pallet-max-boxes" placeholder="Maximum boxes per pallet" min="1" value="50">
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label for="pallet-spacing">Pallet Spacing (cm between boxes)</label>
+                            <input type="number" id="pallet-spacing" placeholder="Spacing between boxes on pallet" min="0" value="1">
+                        </div>
+                        <div class="pallet-mc-actions">
+                            <button id="add-pallet-btn" class="btn btn-orange">
+                                <i class="fas fa-plus-circle"></i> Add Pallet
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="mc-tab">
+                        <div class="dimension-inputs">
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                    Length
+                                    <input type="number" id="mc-length" placeholder="Length" value="60">
+                                </label>
+                            </div>
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    Width
+                                    <input type="number" id="mc-width" placeholder="Width" value="40">
+                                </label>
+                            </div>
+                            <div class="dimension-box">
+                                <label>
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    Height
+                                    <input type="number" id="mc-height" placeholder="Height" value="40">
+                                </label>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label for="mc-name">Master Carton Name (Optional)</label>
+                            <input type="text" id="mc-name" placeholder="e.g., Large Tea Master Carton">
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label for="mc-max-boxes">Max Boxes per MC</label>
+                            <input type="number" id="mc-max-boxes" placeholder="Maximum boxes per master carton" min="1" value="24">
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label for="mc-spacing">MC Spacing (cm between boxes)</label>
+                            <input type="number" id="mc-spacing" placeholder="Spacing between boxes in MC" min="0" value="0.5">
+                        </div>
+                        <div class="pallet-mc-actions">
+                            <button id="add-mc-btn" class="btn btn-purple">
+                                <i class="fas fa-plus-circle"></i> Add Master Carton
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="manage-tab">
+                        <div class="pallet-mc-list" id="pallet-mc-list">
+                            <!-- Pallet and MC items will be added here -->
+                        </div>
+                        <div class="pallet-mc-actions">
+                            <button id="remove-all-pallets-btn" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Remove All Pallets
+                            </button>
+                            <button id="remove-all-mcs-btn" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Remove All MCs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button id="save-config-btn" class="btn btn-success" style="width: 100%;">
+                        <i class="fas fa-save"></i> Save All Configurations
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-chart-bar"></i> Loading Results & Visualization</h2>
+                
+                <div class="loading-animation" id="loading-animation">
+                    <div class="spinner"></div>
+                    <p>Calculating optimal loading pattern with spacing...</p>
+                </div>
+
+                <div class="results-container" id="results-container">
+                    <h3 class="card-title" style="font-size: 1.3rem; margin-bottom: 15px;">
+                        <i class="fas fa-calculator"></i> Maximum Box Capacity
+                    </h3>
+                    
+                    <div class="results-grid" id="results-grid">
+                        <!-- Results will be added here dynamically -->
+                    </div>
+
+                    <div class="pallet-mc-results" id="pallet-mc-results">
+                        <!-- Pallet and MC results will be added here -->
+                    </div>
+
+                    <div class="export-actions">
+                        <button id="export-pdf-btn" class="btn btn-purple">
+                            <i class="fas fa-file-pdf"></i> Export to PDF
+                        </button>
+                        <button id="export-report-btn" class="btn btn-success">
+                            <i class="fas fa-file-export"></i> Detailed Report
+                        </button>
+                    </div>
+
+                    <div class="loading-controls">
+                        <div class="loading-step active" data-step="1">Layer 1</div>
+                        <div class="loading-step" data-step="2">Layer 2</div>
+                        <div class="loading-step" data-step="3">Layer 3</div>
+                        <div class="loading-step" data-step="all">All Layers</div>
+                        <div class="loading-step" data-step="spacing">Show Spacing</div>
+                    </div>
+
+                    <div class="visualization-container">
+                        <h3 style="margin-bottom: 15px; color: var(--indigo-dark);">Loading Visualization</h3>
+                        <p style="margin-bottom: 10px; font-size: 0.9rem; color: var(--gray-dark);">
+                            Shows actual loading pattern with spacing between boxes
+                        </p>
+                        
+                        <div class="loading-visualization" id="loading-visualization">
+                            <div class="container-outline"></div>
+                            <!-- Boxes will be rendered here -->
+                        </div>
+                        
+                        <div class="visualization-info">
+                            <i class="fas fa-info-circle"></i> 
+                            Blue areas show spacing between boxes and container walls
+                        </div>
+                    </div>
+
+                    <div class="legend" style="margin-top: 20px;">
+                        <div class="legend-item">
+                            <div class="legend-color container"></div>
+                            <span>Container Space</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--green);"></div>
+                            <span>Box Type 1</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: var(--blue);"></div>
+                            <span>Box Type 2</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color spacing"></div>
+                            <span>Spacing</span>
+                        </div>
+                    </div>
+
+                    <button id="calculate-btn" class="btn btn-success" style="width: 100%; margin-top: 25px;">
+                        <i class="fas fa-cogs"></i> Calculate Loading Plan with Spacing
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> How to Use This Advanced System</h3>
+            <ul>
+                <li><strong>Step 1:</strong> Select container type and enter box dimensions with spacing requirements</li>
+                <li><strong>Step 2:</strong> Use "Spacing Controls" tab to set spacing between boxes and walls</li>
+                <li><strong>Step 3:</strong> Add multiple Pallets and Master Cartons with different configurations</li>
+                <li><strong>Step 4:</strong> Manage Pallets/MCs in "Manage" tab - add, remove, or delete all</li>
+                <li><strong>Step 5:</strong> Apply spacing to all boxes using "Apply Spacing to All Boxes"</li>
+                <li><strong>Step 6:</strong> Save configurations for future use</li>
+                <li><strong>Step 7:</strong> Calculate loading plan with spacing visualization</li>
+                <li><strong>Step 8:</strong> Use "Show Spacing" to visualize gaps between boxes</li>
+                <li><strong>Step 9:</strong> Export comprehensive PDF reports with spacing details</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Ceylon Tea Loading System &copy; 2023 | Advanced Pallet/MC Management with Spacing Controls</p>
+        </footer>
+    </div>
+
+    <!-- PDF Export Modal -->
+    <div class="modal" id="pdf-export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-pdf"></i> Export Loading Plan to PDF</h3>
+                <button class="close-modal" id="close-pdf-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Report Title</label>
+                    <input type="text" id="pdf-title" value="Ceylon Tea Loading Plan" placeholder="Enter report title">
+                </div>
+                <div class="form-group">
+                    <label>Include Details</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="include-summary" checked> 
+                            <span>Executive Summary</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="include-box-details" checked> 
+                            <span>Box Details with Spacing</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="include-pallet-mc" checked> 
+                            <span>Pallet & Master Carton</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="include-spacing-details" checked> 
+                            <span>Spacing Configuration</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="include-loading-pattern" checked> 
+                            <span>Loading Pattern</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Additional Notes (Optional)</label>
+                    <textarea id="pdf-notes" rows="4" placeholder="Enter any additional notes for the report..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancel-pdf">Cancel</button>
+                <button class="btn btn-purple" id="generate-pdf">
+                    <i class="fas fa-file-pdf"></i> Generate PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Report Modal -->
+    <div class="modal" id="report-modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-alt"></i> Detailed Loading Report</h3>
+                <button class="close-modal" id="close-report-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="report-content">
+                    <!-- Report content will be generated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-purple" id="print-report">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+                <button class="btn" id="close-report">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Saved Modal -->
+    <div class="modal" id="config-saved-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle" style="color: var(--green);"></i> Configurations Saved</h3>
+                <button class="close-modal" id="close-config-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; font-size: 1.1rem; margin: 20px 0;">
+                    All configurations have been saved successfully!
+                </p>
+                <div style="background-color: var(--gray-light); padding: 15px; border-radius: var(--radius); margin: 20px 0;">
+                    <p><strong>Boxes:</strong> <span id="saved-boxes-count">0</span> types configured</p>
+                    <p><strong>Pallets:</strong> <span id="saved-pallets-count">0</span> types configured</p>
+                    <p><strong>Master Cartons:</strong> <span id="saved-mcs-count">0</span> types configured</p>
+                    <p><strong>Spacing:</strong> Applied to all boxes</p>
+                    <p><strong>Saved at:</strong> <span id="saved-config-time"></span></p>
+                </div>
+                <p style="text-align: center; color: var(--gray-dark);">
+                    These settings will be used for all future calculations until changed.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="ok-config">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Container dimensions data (in inches, cm, and meters)
+        const containerData = {
+            '20std': { 
+                name: '20\' Standard Container',
+                length_in: 240, width_in: 96, height_in: 102,
+                length_cm: 609.6, width_cm: 243.8, height_cm: 259.1,
+                length_m: 6.096, width_m: 2.438, height_m: 2.591,
+                volume_cm: 609.6 * 243.8 * 259.1
+            },
+            '40std': { 
+                name: '40\' Standard Container',
+                length_in: 480, width_in: 96, height_in: 102,
+                length_cm: 1219.2, width_cm: 243.8, height_cm: 259.1,
+                length_m: 12.192, width_m: 2.438, height_m: 2.591,
+                volume_cm: 1219.2 * 243.8 * 259.1
+            },
+            '40hc': { 
+                name: '40\' High Cube Container',
+                length_in: 480, width_in: 96, height_in: 114,
+                length_cm: 1219.2, width_cm: 243.8, height_cm: 289.6,
+                length_m: 12.192, width_m: 2.438, height_m: 2.896,
+                volume_cm: 1219.2 * 243.8 * 289.6
+            },
+            '20ref': { 
+                name: '20\' Refrigerated Container',
+                length_in: 230, width_in: 92, height_in: 98,
+                length_cm: 584.2, width_cm: 233.7, height_cm: 248.9,
+                length_m: 5.842, width_m: 2.337, height_m: 2.489,
+                volume_cm: 584.2 * 233.7 * 248.9
+            },
+            '40ref': { 
+                name: '40\' Refrigerated Container',
+                length_in: 475, width_in: 92, height_in: 98,
+                length_cm: 1206.5, width_cm: 233.7, height_cm: 248.9,
+                length_m: 12.065, width_m: 2.337, height_m: 2.489,
+                volume_cm: 1206.5 * 233.7 * 248.9
+            },
+            '45hc': { 
+                name: '45\' High Cube Container',
+                length_in: 540, width_in: 96, height_in: 114,
+                length_cm: 1371.6, width_cm: 243.8, height_cm: 289.6,
+                length_m: 13.716, width_m: 2.438, height_m: 2.896,
+                volume_cm: 1371.6 * 243.8 * 289.6
+            }
+        };
+
+        // Current unit (cm, m, or in)
+        let currentUnit = 'cm';
+        // List of box sizes to calculate
+        let boxSizes = [];
+        // Current container type
+        let currentContainer = '40std';
+        // Loading visualization data
+        let loadingData = {
+            layers: [],
+            currentLayer: 1,
+            showSpacing: false
+        };
+        // Results data for export
+        let calculationResults = {};
+        // Spacing configuration
+        let spacingConfig = {
+            length: 2,    // cm between boxes lengthwise
+            width: 2,     // cm between boxes widthwise
+            height: 2,    // cm between boxes vertically
+            wall: 5       // cm from container walls
+        };
+        // Pallet and Master Carton configurations
+        let pallets = [];
+        let masterCartons = [];
+        // Pallet and MC calculation results
+        let palletResults = [];
+        let mcResults = [];
+
+        // DOM elements
+        const containerSelect = document.getElementById('container-select');
+        const containerDimensionsDiv = document.getElementById('container-dimensions');
+        const unitOptions = document.querySelectorAll('.unit-option');
+        const boxLengthInput = document.getElementById('box-length');
+        const boxWidthInput = document.getElementById('box-width');
+        const boxHeightInput = document.getElementById('box-height');
+        const boxNameInput = document.getElementById('box-name');
+        const boxQuantityInput = document.getElementById('box-quantity');
+        
+        // Spacing elements
+        const spacingLengthInput = document.getElementById('spacing-length');
+        const spacingWidthInput = document.getElementById('spacing-width');
+        const spacingHeightInput = document.getElementById('spacing-height');
+        const spacingWallInput = document.getElementById('spacing-wall');
+        
+        // Pallet elements
+        const palletLengthInput = document.getElementById('pallet-length');
+        const palletWidthInput = document.getElementById('pallet-width');
+        const palletHeightInput = document.getElementById('pallet-height');
+        const palletNameInput = document.getElementById('pallet-name');
+        const palletMaxBoxesInput = document.getElementById('pallet-max-boxes');
+        const palletSpacingInput = document.getElementById('pallet-spacing');
+        
+        // MC elements
+        const mcLengthInput = document.getElementById('mc-length');
+        const mcWidthInput = document.getElementById('mc-width');
+        const mcHeightInput = document.getElementById('mc-height');
+        const mcNameInput = document.getElementById('mc-name');
+        const mcMaxBoxesInput = document.getElementById('mc-max-boxes');
+        const mcSpacingInput = document.getElementById('mc-spacing');
+        
+        // Button elements
+        const addBoxBtn = document.getElementById('add-box-btn');
+        const removeAllBoxesBtn = document.getElementById('remove-all-boxes-btn');
+        const applySpacingBtn = document.getElementById('apply-spacing-btn');
+        const addPalletBtn = document.getElementById('add-pallet-btn');
+        const addMcBtn = document.getElementById('add-mc-btn');
+        const removeAllPalletsBtn = document.getElementById('remove-all-pallets-btn');
+        const removeAllMcsBtn = document.getElementById('remove-all-mcs-btn');
+        const saveConfigBtn = document.getElementById('save-config-btn');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        const exportReportBtn = document.getElementById('export-report-btn');
+        
+        // List elements
+        const boxesList = document.getElementById('boxes-list');
+        const palletMcList = document.getElementById('pallet-mc-list');
+        
+        // Other UI elements
+        const loadingAnimation = document.getElementById('loading-animation');
+        const resultsContainer = document.getElementById('results-container');
+        const loadingVisualization = document.getElementById('loading-visualization');
+        const resultsGrid = document.getElementById('results-grid');
+        const palletMcResults = document.getElementById('pallet-mc-results');
+        const loadingSteps = document.querySelectorAll('.loading-step');
+        
+        // Tab elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Modal elements
+        const pdfExportModal = document.getElementById('pdf-export-modal');
+        const reportModal = document.getElementById('report-modal');
+        const configSavedModal = document.getElementById('config-saved-modal');
+        const closePdfModal = document.getElementById('close-pdf-modal');
+        const cancelPdf = document.getElementById('cancel-pdf');
+        const generatePdf = document.getElementById('generate-pdf');
+        const closeReportModal = document.getElementById('close-report-modal');
+        const closeReport = document.getElementById('close-report');
+        const printReport = document.getElementById('print-report');
+        const closeConfigModal = document.getElementById('close-config-modal');
+        const okConfig = document.getElementById('ok-config');
+        const reportContent = document.getElementById('report-content');
+
+        // Initialize the page
+        function initPage() {
+            // Set up container selection
+            containerSelect.value = currentContainer;
+            updateContainerDimensions();
+            
+            // Set up unit selector
+            unitOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    unitOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    currentUnit = this.dataset.unit;
+                    updateContainerDimensions();
+                    updateBoxInputsForUnit();
+                    updateStorageInputsForUnit();
+                });
+            });
+
+            // Set up tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // Update tab active state
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Set up buttons
+            addBoxBtn.addEventListener('click', addBoxSize);
+            removeAllBoxesBtn.addEventListener('click', removeAllBoxSizes);
+            applySpacingBtn.addEventListener('click', applySpacingToAllBoxes);
+            addPalletBtn.addEventListener('click', addPallet);
+            addMcBtn.addEventListener('click', addMasterCarton);
+            removeAllPalletsBtn.addEventListener('click', removeAllPallets);
+            removeAllMcsBtn.addEventListener('click', removeAllMasterCartons);
+            saveConfigBtn.addEventListener('click', saveAllConfigurations);
+            calculateBtn.addEventListener('click', calculateLoadingPlan);
+            exportPdfBtn.addEventListener('click', openPdfExportModal);
+            exportReportBtn.addEventListener('click', openDetailedReport);
+            
+            // Set up container change listener
+            containerSelect.addEventListener('change', function() {
+                currentContainer = this.value;
+                updateContainerDimensions();
+                calculateLoadingPlan();
+            });
+
+            // Set up loading step controls
+            loadingSteps.forEach(step => {
+                step.addEventListener('click', function() {
+                    loadingSteps.forEach(s => s.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const stepValue = this.dataset.step;
+                    if (stepValue === 'spacing') {
+                        loadingData.currentLayer = 1;
+                        loadingData.showSpacing = true;
+                    } else {
+                        loadingData.currentLayer = stepValue === 'all' ? 'all' : parseInt(stepValue);
+                        loadingData.showSpacing = false;
+                    }
+                    
+                    updateLoadingVisualization();
+                });
+            });
+
+            // Set up modal controls
+            closePdfModal.addEventListener('click', () => pdfExportModal.classList.remove('active'));
+            cancelPdf.addEventListener('click', () => pdfExportModal.classList.remove('active'));
+            generatePdf.addEventListener('click', generatePdfReport);
+            
+            closeReportModal.addEventListener('click', () => reportModal.classList.remove('active'));
+            closeReport.addEventListener('click', () => reportModal.classList.remove('active'));
+            printReport.addEventListener('click', printReportContent);
+            
+            closeConfigModal.addEventListener('click', () => configSavedModal.classList.remove('active'));
+            okConfig.addEventListener('click', () => configSavedModal.classList.remove('active'));
+            
+            // Close modals when clicking outside
+            [pdfExportModal, reportModal, configSavedModal].forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Load saved configurations
+            loadSavedConfigurations();
+            
+            // Add initial box
+            addInitialBox();
+            
+            // Add initial pallet and MC
+            addInitialPallet();
+            addInitialMC();
+            
+            // Initial calculation
+            calculateLoadingPlan();
+        }
+
+        // Load saved configurations
+        function loadSavedConfigurations() {
+            // Try to load from localStorage
+            const savedConfig = localStorage.getItem('ceylonTeaAdvancedConfig');
+            if (savedConfig) {
+                try {
+                    const config = JSON.parse(savedConfig);
+                    
+                    // Load spacing configuration
+                    if (config.spacing) {
+                        spacingConfig = config.spacing;
+                        spacingLengthInput.value = spacingConfig.length;
+                        spacingWidthInput.value = spacingConfig.width;
+                        spacingHeightInput.value = spacingConfig.height;
+                        spacingWallInput.value = spacingConfig.wall;
+                    }
+                    
+                    // Load boxes
+                    if (config.boxes && config.boxes.length > 0) {
+                        boxSizes = config.boxes;
+                        updateBoxesList();
+                    }
+                    
+                    // Load pallets
+                    if (config.pallets && config.pallets.length > 0) {
+                        pallets = config.pallets;
+                        updatePalletMcList();
+                    }
+                    
+                    // Load master cartons
+                    if (config.masterCartons && config.masterCartons.length > 0) {
+                        masterCartons = config.masterCartons;
+                        updatePalletMcList();
+                    }
+                    
+                    console.log('Loaded saved configurations');
+                } catch (e) {
+                    console.error('Error loading configurations:', e);
+                }
+            }
+        }
+
+        // Save all configurations
+        function saveAllConfigurations() {
+            // Update spacing configuration from inputs
+            spacingConfig.length = parseFloat(spacingLengthInput.value) || 0;
+            spacingConfig.width = parseFloat(spacingWidthInput.value) || 0;
+            spacingConfig.height = parseFloat(spacingHeightInput.value) || 0;
+            spacingConfig.wall = parseFloat(spacingWallInput.value) || 0;
+            
+            // Apply spacing to all boxes
+            applySpacingToAllBoxes();
+            
+            // Save all configurations
+            const configToSave = {
+                boxes: boxSizes,
+                pallets: pallets,
+                masterCartons: masterCartons,
+                spacing: spacingConfig,
+                savedTime: new Date().toLocaleString()
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('ceylonTeaAdvancedConfig', JSON.stringify(configToSave));
+            
+            // Update saved modal content
+            document.getElementById('saved-boxes-count').textContent = boxSizes.length;
+            document.getElementById('saved-pallets-count').textContent = pallets.length;
+            document.getElementById('saved-mcs-count').textContent = masterCartons.length;
+            document.getElementById('saved-config-time').textContent = new Date().toLocaleString();
+            
+            // Show success modal
+            configSavedModal.classList.add('active');
+            
+            // Recalculate
+            if (boxSizes.length > 0) {
+                calculateLoadingPlan();
+            }
+        }
+
+        // Add initial box
+        function addInitialBox() {
+            if (boxSizes.length === 0) {
+                const initialBox = {
+                    name: 'Premium Tea Box 250g',
+                    length: 30,
+                    width: 20,
+                    height: 15,
+                    unit: 'cm',
+                    quantity: 100,
+                    type: 'calculated',
+                    spacing: {
+                        length: spacingConfig.length,
+                        width: spacingConfig.width,
+                        height: spacingConfig.height
+                    }
+                };
+                
+                boxSizes.push(initialBox);
+                updateBoxesList();
+            }
+        }
+
+        // Add initial pallet
+        function addInitialPallet() {
+            if (pallets.length === 0) {
+                const initialPallet = {
+                    name: 'Standard Euro Pallet',
+                    length: 120,
+                    width: 100,
+                    height: 15,
+                    unit: 'cm',
+                    maxBoxes: 50,
+                    spacing: 1,
+                    type: 'pallet'
+                };
+                
+                pallets.push(initialPallet);
+                updatePalletMcList();
+            }
+        }
+
+        // Add initial master carton
+        function addInitialMC() {
+            if (masterCartons.length === 0) {
+                const initialMC = {
+                    name: 'Large Tea Master Carton',
+                    length: 60,
+                    width: 40,
+                    height: 40,
+                    unit: 'cm',
+                    maxBoxes: 24,
+                    spacing: 0.5,
+                    type: 'mastercarton'
+                };
+                
+                masterCartons.push(initialMC);
+                updatePalletMcList();
+            }
+        }
+
+        // Update container dimensions display based on selected unit
+        function updateContainerDimensions() {
+            const container = containerData[currentContainer];
+            let length, width, height, unitLabel;
+            
+            if (currentUnit === 'cm') {
+                length = container.length_cm.toFixed(1);
+                width = container.width_cm.toFixed(1);
+                height = container.height_cm.toFixed(1);
+                unitLabel = 'cm';
+            } else if (currentUnit === 'm') {
+                length = container.length_m.toFixed(3);
+                width = container.width_m.toFixed(3);
+                height = container.height_m.toFixed(3);
+                unitLabel = 'm';
+            } else {
+                length = container.length_in;
+                width = container.width_in;
+                height = container.height_in;
+                unitLabel = 'in';
+            }
+            
+            containerDimensionsDiv.innerHTML = `
+                <div class="dimension-box">
+                    <label>
+                        <i class="fas fa-arrows-alt-h"></i>
+                        Length
+                        <input type="text" value="${length} ${unitLabel}" readonly>
+                    </label>
+                </div>
+                <div class="dimension-box">
+                    <label>
+                        <i class="fas fa-arrows-alt-v"></i>
+                        Width
+                        <input type="text" value="${width} ${unitLabel}" readonly>
+                    </label>
+                </div>
+                <div class="dimension-box">
+                    <label>
+                        <i class="fas fa-arrows-alt-v"></i>
+                        Height
+                        <input type="text" value="${height} ${unitLabel}" readonly>
+                    </label>
+                </div>
+            `;
+        }
+
+        // Update box inputs when unit changes
+        function updateBoxInputsForUnit() {
+            // Convert existing box sizes to new unit
+            if (boxSizes.length > 0) {
+                const firstBox = boxSizes[0];
+                let newLength, newWidth, newHeight;
+                
+                // Convert from current unit to new unit
+                if (firstBox.unit === 'cm' && currentUnit === 'm') {
+                    newLength = firstBox.length / 100;
+                    newWidth = firstBox.width / 100;
+                    newHeight = firstBox.height / 100;
+                } else if (firstBox.unit === 'cm' && currentUnit === 'in') {
+                    newLength = firstBox.length / 2.54;
+                    newWidth = firstBox.width / 2.54;
+                    newHeight = firstBox.height / 2.54;
+                } else if (firstBox.unit === 'm' && currentUnit === 'cm') {
+                    newLength = firstBox.length * 100;
+                    newWidth = firstBox.width * 100;
+                    newHeight = firstBox.height * 100;
+                } else if (firstBox.unit === 'm' && currentUnit === 'in') {
+                    newLength = firstBox.length * 39.37;
+                    newWidth = firstBox.width * 39.37;
+                    newHeight = firstBox.height * 39.37;
+                } else if (firstBox.unit === 'in' && currentUnit === 'cm') {
+                    newLength = firstBox.length * 2.54;
+                    newWidth = firstBox.width * 2.54;
+                    newHeight = firstBox.height * 2.54;
+                } else if (firstBox.unit === 'in' && currentUnit === 'm') {
+                    newLength = firstBox.length * 0.0254;
+                    newWidth = firstBox.width * 0.0254;
+                    newHeight = firstBox.height * 0.0254;
+                } else {
+                    newLength = firstBox.length;
+                    newWidth = firstBox.width;
+                    newHeight = firstBox.height;
+                }
+                
+                // Update input values
+                boxLengthInput.value = Math.round(newLength);
+                boxWidthInput.value = Math.round(newWidth);
+                boxHeightInput.value = Math.round(newHeight);
+            }
+        }
+
+        // Update storage inputs when unit changes
+        function updateStorageInputsForUnit() {
+            // Update pallet inputs if pallets exist
+            if (pallets.length > 0) {
+                const firstPallet = pallets[0];
+                let newLength, newWidth, newHeight;
+                
+                // Convert from current unit to new unit
+                if (firstPallet.unit === 'cm' && currentUnit === 'm') {
+                    newLength = firstPallet.length / 100;
+                    newWidth = firstPallet.width / 100;
+                    newHeight = firstPallet.height / 100;
+                } else if (firstPallet.unit === 'cm' && currentUnit === 'in') {
+                    newLength = firstPallet.length / 2.54;
+                    newWidth = firstPallet.width / 2.54;
+                    newHeight = firstPallet.height / 2.54;
+                } else if (firstPallet.unit === 'm' && currentUnit === 'cm') {
+                    newLength = firstPallet.length * 100;
+                    newWidth = firstPallet.width * 100;
+                    newHeight = firstPallet.height * 100;
+                } else if (firstPallet.unit === 'm' && currentUnit === 'in') {
+                    newLength = firstPallet.length * 39.37;
+                    newWidth = firstPallet.width * 39.37;
+                    newHeight = firstPallet.height * 39.37;
+                } else if (firstPallet.unit === 'in' && currentUnit === 'cm') {
+                    newLength = firstPallet.length * 2.54;
+                    newWidth = firstPallet.width * 2.54;
+                    newHeight = firstPallet.height * 2.54;
+                } else if (firstPallet.unit === 'in' && currentUnit === 'm') {
+                    newLength = firstPallet.length * 0.0254;
+                    newWidth = firstPallet.width * 0.0254;
+                    newHeight = firstPallet.height * 0.0254;
+                } else {
+                    newLength = firstPallet.length;
+                    newWidth = firstPallet.width;
+                    newHeight = firstPallet.height;
+                }
+                
+                // Update input values
+                palletLengthInput.value = Math.round(newLength);
+                palletWidthInput.value = Math.round(newWidth);
+                palletHeightInput.value = Math.round(newHeight);
+            }
+            
+            // Update MC inputs if MCs exist
+            if (masterCartons.length > 0) {
+                const firstMC = masterCartons[0];
+                let newLength, newWidth, newHeight;
+                
+                // Convert from current unit to new unit
+                if (firstMC.unit === 'cm' && currentUnit === 'm') {
+                    newLength = firstMC.length / 100;
+                    newWidth = firstMC.width / 100;
+                    newHeight = firstMC.height / 100;
+                } else if (firstMC.unit === 'cm' && currentUnit === 'in') {
+                    newLength = firstMC.length / 2.54;
+                    newWidth = firstMC.width / 2.54;
+                    newHeight = firstMC.height / 2.54;
+                } else if (firstMC.unit === 'm' && currentUnit === 'cm') {
+                    newLength = firstMC.length * 100;
+                    newWidth = firstMC.width * 100;
+                    newHeight = firstMC.height * 100;
+                } else if (firstMC.unit === 'm' && currentUnit === 'in') {
+                    newLength = firstMC.length * 39.37;
+                    newWidth = firstMC.width * 39.37;
+                    newHeight = firstMC.height * 39.37;
+                } else if (firstMC.unit === 'in' && currentUnit === 'cm') {
+                    newLength = firstMC.length * 2.54;
+                    newWidth = firstMC.width * 2.54;
+                    newHeight = firstMC.height * 2.54;
+                } else if (firstMC.unit === 'in' && currentUnit === 'm') {
+                    newLength = firstMC.length * 0.0254;
+                    newWidth = firstMC.width * 0.0254;
+                    newHeight = firstMC.height * 0.0254;
+                } else {
+                    newLength = firstMC.length;
+                    newWidth = firstMC.width;
+                    newHeight = firstMC.height;
+                }
+                
+                // Update input values
+                mcLengthInput.value = Math.round(newLength);
+                mcWidthInput.value = Math.round(newWidth);
+                mcHeightInput.value = Math.round(newHeight);
+            }
+        }
+
+        // Add a new box size to the list
+        function addBoxSize() {
+            const length = parseFloat(boxLengthInput.value);
+            const width = parseFloat(boxWidthInput.value);
+            const height = parseFloat(boxHeightInput.value);
+            const name = boxNameInput.value.trim() || `Box ${boxSizes.length + 1}`;
+            const quantity = parseInt(boxQuantityInput.value) || 1;
+            
+            if (!length || !width || !height || length <= 0 || width <= 0 || height <= 0) {
+                alert('Please enter valid box dimensions');
+                return;
+            }
+            
+            if (!quantity || quantity <= 0) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+            
+            const newBox = {
+                name: name,
+                length: length,
+                width: width,
+                height: height,
+                unit: currentUnit,
+                quantity: quantity,
+                type: 'calculated',
+                spacing: {
+                    length: spacingConfig.length,
+                    width: spacingConfig.width,
+                    height: spacingConfig.height
+                }
+            };
+            
+            boxSizes.push(newBox);
+            updateBoxesList();
+            calculateLoadingPlan();
+            
+            // Reset input values for next box
+            boxLengthInput.value = '';
+            boxWidthInput.value = '';
+            boxHeightInput.value = '';
+            boxNameInput.value = '';
+            boxQuantityInput.value = '100';
+            boxLengthInput.focus();
+        }
+
+        // Apply spacing to all boxes
+        function applySpacingToAllBoxes() {
+            // Update spacing configuration from inputs
+            spacingConfig.length = parseFloat(spacingLengthInput.value) || 0;
+            spacingConfig.width = parseFloat(spacingWidthInput.value) || 0;
+            spacingConfig.height = parseFloat(spacingHeightInput.value) || 0;
+            spacingConfig.wall = parseFloat(spacingWallInput.value) || 0;
+            
+            // Apply spacing to all existing boxes
+            boxSizes.forEach(box => {
+                box.spacing = {
+                    length: spacingConfig.length,
+                    width: spacingConfig.width,
+                    height: spacingConfig.height
+                };
+            });
+            
+            updateBoxesList();
+            
+            // Show notification
+            showNotification(`Spacing applied to all ${boxSizes.length} boxes`, 'success');
+            
+            // Recalculate if boxes exist
+            if (boxSizes.length > 0) {
+                calculateLoadingPlan();
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background-color: ${type === 'success' ? 'var(--green)' : 'var(--blue)'};
+                color: white;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+                max-width: 300px;
+                font-weight: 500;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Add a new pallet
+        function addPallet() {
+            const length = parseFloat(palletLengthInput.value);
+            const width = parseFloat(palletWidthInput.value);
+            const height = parseFloat(palletHeightInput.value);
+            const name = palletNameInput.value.trim() || `Pallet ${pallets.length + 1}`;
+            const maxBoxes = parseInt(palletMaxBoxesInput.value) || 50;
+            const spacing = parseFloat(palletSpacingInput.value) || 0;
+            
+            if (!length || !width || !height || length <= 0 || width <= 0 || height <= 0) {
+                alert('Please enter valid pallet dimensions');
+                return;
+            }
+            
+            if (!maxBoxes || maxBoxes <= 0) {
+                alert('Please enter a valid maximum boxes count');
+                return;
+            }
+            
+            const newPallet = {
+                name: name,
+                length: length,
+                width: width,
+                height: height,
+                unit: currentUnit,
+                maxBoxes: maxBoxes,
+                spacing: spacing,
+                type: 'pallet'
+            };
+            
+            pallets.push(newPallet);
+            updatePalletMcList();
+            calculateLoadingPlan();
+            
+            // Reset input values for next pallet
+            palletNameInput.value = '';
+            palletSpacingInput.value = '1';
+            
+            showNotification(`Pallet "${name}" added successfully`, 'success');
+        }
+
+        // Add a new master carton
+        function addMasterCarton() {
+            const length = parseFloat(mcLengthInput.value);
+            const width = parseFloat(mcWidthInput.value);
+            const height = parseFloat(mcHeightInput.value);
+            const name = mcNameInput.value.trim() || `Master Carton ${masterCartons.length + 1}`;
+            const maxBoxes = parseInt(mcMaxBoxesInput.value) || 24;
+            const spacing = parseFloat(mcSpacingInput.value) || 0;
+            
+            if (!length || !width || !height || length <= 0 || width <= 0 || height <= 0) {
+                alert('Please enter valid master carton dimensions');
+                return;
+            }
+            
+            if (!maxBoxes || maxBoxes <= 0) {
+                alert('Please enter a valid maximum boxes count');
+                return;
+            }
+            
+            const newMC = {
+                name: name,
+                length: length,
+                width: width,
+                height: height,
+                unit: currentUnit,
+                maxBoxes: maxBoxes,
+                spacing: spacing,
+                type: 'mastercarton'
+            };
+            
+            masterCartons.push(newMC);
+            updatePalletMcList();
+            calculateLoadingPlan();
+            
+            // Reset input values for next MC
+            mcNameInput.value = '';
+            mcSpacingInput.value = '0.5';
+            
+            showNotification(`Master Carton "${name}" added successfully`, 'success');
+        }
+
+        // Remove all box sizes
+        function removeAllBoxSizes() {
+            if (boxSizes.length === 0) {
+                alert('No box sizes to remove');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to remove all box sizes?')) {
+                boxSizes = [];
+                updateBoxesList();
+                calculateLoadingPlan();
+                showNotification('All boxes removed', 'info');
+            }
+        }
+
+        // Remove all pallets
+        function removeAllPallets() {
+            if (pallets.length === 0) {
+                alert('No pallets to remove');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to remove all pallets?')) {
+                pallets = [];
+                updatePalletMcList();
+                calculateLoadingPlan();
+                showNotification('All pallets removed', 'info');
+            }
+        }
+
+        // Remove all master cartons
+        function removeAllMasterCartons() {
+            if (masterCartons.length === 0) {
+                alert('No master cartons to remove');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to remove all master cartons?')) {
+                masterCartons = [];
+                updatePalletMcList();
+                calculateLoadingPlan();
+                showNotification('All master cartons removed', 'info');
+            }
+        }
+
+        // Update the boxes list UI
+        function updateBoxesList() {
+            boxesList.innerHTML = '';
+            
+            if (boxSizes.length === 0) {
+                boxesList.innerHTML = `
+                    <div class="box-item" style="text-align: center; color: var(--gray-dark);">
+                        <i class="fas fa-info-circle"></i> No box sizes added. Add a box size to begin.
+                    </div>
+                `;
+                return;
+            }
+            
+            boxSizes.forEach((box, index) => {
+                const boxItem = document.createElement('div');
+                boxItem.className = 'box-item';
+                
+                const spacingText = box.spacing ? 
+                    `Spacing: L=${box.spacing.length}cm, W=${box.spacing.width}cm, H=${box.spacing.height}cm` : 
+                    'Spacing: Not configured';
+                
+                boxItem.innerHTML = `
+                    <div class="box-info">
+                        <div class="box-name">${box.name}</div>
+                        <div class="box-dimensions">${box.length} × ${box.width} × ${box.height} ${box.unit}</div>
+                        <div class="box-quantity">Available Quantity: ${box.quantity.toLocaleString()}</div>
+                        <div class="box-spacing">${spacingText}</div>
+                        <div class="box-count" id="box-count-${index}">Maximum in Container: Calculating...</div>
+                    </div>
+                    <button class="remove-box" data-index="${index}" title="Remove box size">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                boxesList.appendChild(boxItem);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-box').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    if (boxSizes.length > 1) {
+                        boxSizes.splice(index, 1);
+                        updateBoxesList();
+                        calculateLoadingPlan();
+                        showNotification('Box removed', 'info');
+                    } else {
+                        alert('You need at least one box size');
+                    }
+                });
+            });
+        }
+
+        // Update the pallet and MC list UI
+        function updatePalletMcList() {
+            palletMcList.innerHTML = '';
+            
+            const allItems = [...pallets.map(p => ({...p, isPallet: true})), ...masterCartons.map(mc => ({...mc, isPallet: false}))];
+            
+            if (allItems.length === 0) {
+                palletMcList.innerHTML = `
+                    <div class="pallet-mc-item" style="text-align: center; color: var(--gray-dark);">
+                        <i class="fas fa-info-circle"></i> No pallets or master cartons added.
+                    </div>
+                `;
+                return;
+            }
+            
+            allItems.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `pallet-mc-item ${item.isPallet ? 'pallet-item' : 'mc-item'}`;
+                
+                const icon = item.isPallet ? '<i class="fas fa-pallet"></i>' : '<i class="fas fa-boxes"></i>';
+                const typeText = item.isPallet ? 'Pallet' : 'Master Carton';
+                const spacingText = item.spacing ? `Spacing: ${item.spacing}cm` : 'No spacing';
+                
+                itemDiv.innerHTML = `
+                    <div class="pallet-mc-info">
+                        <div class="pallet-mc-name">${icon} ${item.name}</div>
+                        <div class="pallet-mc-dimensions">${item.length} × ${item.width} × ${item.height} ${item.unit}</div>
+                        <div class="pallet-mc-spacing">${spacingText} | Max Boxes: ${item.maxBoxes}</div>
+                    </div>
+                    <button class="remove-pallet-mc" data-type="${item.isPallet ? 'pallet' : 'mc'}" data-index="${item.isPallet ? pallets.indexOf(item) : masterCartons.indexOf(item)}" title="Remove ${typeText}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                palletMcList.appendChild(itemDiv);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-pallet-mc').forEach(button => {
+                button.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const index = parseInt(this.dataset.index);
+                    
+                    if (type === 'pallet') {
+                        if (pallets.length > 1) {
+                            pallets.splice(index, 1);
+                            updatePalletMcList();
+                            calculateLoadingPlan();
+                            showNotification('Pallet removed', 'info');
+                        } else {
+                            alert('You need at least one pallet configuration');
+                        }
+                    } else {
+                        if (masterCartons.length > 1) {
+                            masterCartons.splice(index, 1);
+                            updatePalletMcList();
+                            calculateLoadingPlan();
+                            showNotification('Master Carton removed', 'info');
+                        } else {
+                            alert('You need at least one master carton configuration');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Calculate the loading plan with spacing
+        function calculateLoadingPlan() {
+            // Show loading animation
+            loadingAnimation.classList.add('active');
+            resultsContainer.style.opacity = '0.7';
+            
+            // Clear previous loading data
+            loadingData.layers = [];
+            palletResults = [];
+            mcResults = [];
+            
+            // Simulate calculation time
+            setTimeout(() => {
+                const container = containerData[currentContainer];
+                
+                // Convert container dimensions to cm for calculations
+                const containerLength = container.length_cm;
+                const containerWidth = container.width_cm;
+                const containerHeight = container.height_cm;
+                
+                // Adjust container dimensions for wall clearance
+                const effectiveContainerLength = containerLength - (2 * spacingConfig.wall);
+                const effectiveContainerWidth = containerWidth - (2 * spacingConfig.wall);
+                const effectiveContainerHeight = containerHeight - spacingConfig.wall; // Only bottom clearance for height
+                
+                let totalBoxes = 0;
+                let totalVolume = 0;
+                let boxResults = [];
+                
+                // Calculate for each box size
+                boxSizes.forEach((box, index) => {
+                    // Convert box dimensions to cm
+                    let boxLength, boxWidth, boxHeight;
+                    
+                    if (box.unit === 'cm') {
+                        boxLength = box.length;
+                        boxWidth = box.width;
+                        boxHeight = box.height;
+                    } else if (box.unit === 'm') {
+                        boxLength = box.length * 100;
+                        boxWidth = box.width * 100;
+                        boxHeight = box.height * 100;
+                    } else { // inches
+                        boxLength = box.length * 2.54;
+                        boxWidth = box.width * 2.54;
+                        boxHeight = box.height * 2.54;
+                    }
+                    
+                    // Add spacing to box dimensions
+                    const boxSpacing = box.spacing || spacingConfig;
+                    const boxWithSpacingLength = boxLength + boxSpacing.length;
+                    const boxWithSpacingWidth = boxWidth + boxSpacing.width;
+                    const boxWithSpacingHeight = boxHeight + boxSpacing.height;
+                    
+                    // Calculate how many boxes fit in each dimension (with spacing)
+                    const lengthCount = Math.floor(effectiveContainerLength / boxWithSpacingLength);
+                    const widthCount = Math.floor(effectiveContainerWidth / boxWithSpacingWidth);
+                    const heightCount = Math.floor(effectiveContainerHeight / boxWithSpacingHeight);
+                    
+                    // Calculate total boxes that fit
+                    const boxCount = lengthCount * widthCount * heightCount;
+                    const actualBoxCount = Math.min(boxCount, box.quantity || boxCount);
+                    totalBoxes += actualBoxCount;
+                    
+                    // Calculate volume utilization (without spacing for volume calculation)
+                    const boxVolume = boxLength * boxWidth * boxHeight;
+                    totalVolume += actualBoxCount * boxVolume;
+                    
+                    boxResults.push({
+                        name: box.name,
+                        boxCount: actualBoxCount,
+                        requestedQuantity: box.quantity || boxCount,
+                        dimensions: `${box.length} × ${box.width} × ${box.height} ${box.unit}`,
+                        spacing: boxSpacing,
+                        lengthCount: lengthCount,
+                        widthCount: widthCount,
+                        heightCount: heightCount,
+                        boxLength: boxLength,
+                        boxWidth: boxWidth,
+                        boxHeight: boxHeight,
+                        boxWithSpacingLength: boxWithSpacingLength,
+                        boxWithSpacingWidth: boxWithSpacingWidth,
+                        boxWithSpacingHeight: boxWithSpacingHeight,
+                        boxIndex: index,
+                        type: box.type
+                    });
+                    
+                    // Calculate Pallet and Master Carton requirements (with spacing)
+                    calculatePalletAndMCRequirements(box, actualBoxCount, boxLength, boxWidth, boxHeight, boxSpacing);
+                    
+                    // Update box count in the list
+                    const boxCountElement = document.getElementById(`box-count-${index}`);
+                    if (boxCountElement) {
+                        boxCountElement.textContent = `Maximum in Container: ${boxCount.toLocaleString()} boxes (with spacing)`;
+                    }
+                    
+                    // Generate loading pattern for visualization (with spacing)
+                    generateLoadingPattern(boxResults[index], effectiveContainerLength, effectiveContainerWidth, effectiveContainerHeight, actualBoxCount, boxSpacing);
+                });
+                
+                // Calculate container volume
+                const containerVolume = containerLength * containerWidth * containerHeight;
+                const utilizationPercentage = Math.min(100, ((totalVolume / containerVolume) * 100).toFixed(1));
+                
+                // Store results for export
+                calculationResults = {
+                    container: container,
+                    containerName: container.name,
+                    containerLength: containerLength,
+                    containerWidth: containerWidth,
+                    containerHeight: containerHeight,
+                    effectiveContainerLength: effectiveContainerLength,
+                    effectiveContainerWidth: effectiveContainerWidth,
+                    effectiveContainerHeight: effectiveContainerHeight,
+                    containerVolume: containerVolume,
+                    totalBoxes: totalBoxes,
+                    utilizationPercentage: utilizationPercentage,
+                    boxResults: boxResults,
+                    boxSizes: boxSizes,
+                    palletResults: palletResults,
+                    mcResults: mcResults,
+                    pallets: pallets,
+                    masterCartons: masterCartons,
+                    spacingConfig: spacingConfig,
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                // Update UI with results
+                updateResultsGrid(boxResults, totalBoxes, utilizationPercentage, container.name);
+                
+                // Update Pallet and MC results
+                updatePalletMCResults();
+                
+                // Update loading visualization
+                updateLoadingVisualization();
+                
+                // Update loading step controls
+                updateLoadingSteps();
+                
+                // Hide loading animation
+                loadingAnimation.classList.remove('active');
+                resultsContainer.style.opacity = '1';
+                
+                // Show calculation complete notification
+                if (boxSizes.length > 0) {
+                    showNotification(`Calculation complete: ${totalBoxes.toLocaleString()} boxes fit with spacing`, 'success');
+                }
+            }, 1000);
+        }
+
+        // Calculate Pallet and Master Carton requirements with spacing
+        function calculatePalletAndMCRequirements(box, totalBoxes, boxLengthCm, boxWidthCm, boxHeightCm, boxSpacing) {
+            // Calculate for each pallet configuration
+            pallets.forEach(pallet => {
+                // Get pallet dimensions in cm
+                let palletLength, palletWidth, palletHeight;
+                
+                if (pallet.unit === 'cm') {
+                    palletLength = pallet.length;
+                    palletWidth = pallet.width;
+                    palletHeight = pallet.height;
+                } else if (pallet.unit === 'm') {
+                    palletLength = pallet.length * 100;
+                    palletWidth = pallet.width * 100;
+                    palletHeight = pallet.height * 100;
+                } else { // inches
+                    palletLength = pallet.length * 2.54;
+                    palletWidth = pallet.width * 2.54;
+                    palletHeight = pallet.height * 2.54;
+                }
+                
+                // Calculate boxes per pallet layer (with box spacing + pallet spacing)
+                const totalSpacingLength = boxSpacing.length + (pallet.spacing || 0);
+                const totalSpacingWidth = boxSpacing.width + (pallet.spacing || 0);
+                const boxEffectiveLength = boxLengthCm + totalSpacingLength;
+                const boxEffectiveWidth = boxWidthCm + totalSpacingWidth;
+                
+                const palletLayerLength = Math.floor(palletLength / boxEffectiveLength);
+                const palletLayerWidth = Math.floor(palletWidth / boxEffectiveWidth);
+                const boxesPerPalletLayer = palletLayerLength * palletLayerWidth;
+                
+                // Calculate number of layers per pallet (with height spacing)
+                const totalSpacingHeight = boxSpacing.height;
+                const boxEffectiveHeight = boxHeightCm + totalSpacingHeight;
+                const layersPerPallet = Math.floor(palletHeight / boxEffectiveHeight);
+                
+                // Total boxes per pallet
+                const maxBoxesPerPallet = boxesPerPalletLayer * layersPerPallet;
+                const actualBoxesPerPallet = Math.min(maxBoxesPerPallet, pallet.maxBoxes);
+                
+                // Calculate required pallets
+                const palletsRequired = Math.ceil(totalBoxes / actualBoxesPerPallet);
+                
+                // Store results
+                palletResults.push({
+                    boxName: box.name,
+                    palletName: pallet.name,
+                    totalBoxes: totalBoxes,
+                    boxesPerPallet: actualBoxesPerPallet,
+                    palletsRequired: palletsRequired,
+                    palletLayerLength: palletLayerLength,
+                    palletLayerWidth: palletLayerWidth,
+                    layersPerPallet: layersPerPallet,
+                    palletDimensions: `${pallet.length} × ${pallet.width} × ${pallet.height} ${pallet.unit}`,
+                    palletSpacing: pallet.spacing || 0,
+                    boxSpacing: boxSpacing
+                });
+            });
+            
+            // Calculate for each master carton configuration
+            masterCartons.forEach(mc => {
+                // Get MC dimensions in cm
+                let mcLength, mcWidth, mcHeight;
+                
+                if (mc.unit === 'cm') {
+                    mcLength = mc.length;
+                    mcWidth = mc.width;
+                    mcHeight = mc.height;
+                } else if (mc.unit === 'm') {
+                    mcLength = mc.length * 100;
+                    mcWidth = mc.width * 100;
+                    mcHeight = mc.height * 100;
+                } else { // inches
+                    mcLength = mc.length * 2.54;
+                    mcWidth = mc.width * 2.54;
+                    mcHeight = mc.height * 2.54;
+                }
+                
+                // Calculate boxes per MC layer (with box spacing + MC spacing)
+                const totalSpacingLength = boxSpacing.length + (mc.spacing || 0);
+                const totalSpacingWidth = boxSpacing.width + (mc.spacing || 0);
+                const boxEffectiveLength = boxLengthCm + totalSpacingLength;
+                const boxEffectiveWidth = boxWidthCm + totalSpacingWidth;
+                
+                const mcLayerLength = Math.floor(mcLength / boxEffectiveLength);
+                const mcLayerWidth = Math.floor(mcWidth / boxEffectiveWidth);
+                const boxesPerMCLayer = mcLayerLength * mcLayerWidth;
+                
+                // Calculate number of layers per MC (with height spacing)
+                const totalSpacingHeight = boxSpacing.height;
+                const boxEffectiveHeight = boxHeightCm + totalSpacingHeight;
+                const layersPerMC = Math.floor(mcHeight / boxEffectiveHeight);
+                
+                // Total boxes per MC
+                const maxBoxesPerMC = boxesPerMCLayer * layersPerMC;
+                const actualBoxesPerMC = Math.min(maxBoxesPerMC, mc.maxBoxes);
+                
+                // Calculate required MCs
+                const mcsRequired = Math.ceil(totalBoxes / actualBoxesPerMC);
+                
+                // Store results
+                mcResults.push({
+                    boxName: box.name,
+                    mcName: mc.name,
+                    totalBoxes: totalBoxes,
+                    boxesPerMC: actualBoxesPerMC,
+                    mcsRequired: mcsRequired,
+                    mcLayerLength: mcLayerLength,
+                    mcLayerWidth: mcLayerWidth,
+                    layersPerMC: layersPerMC,
+                    mcDimensions: `${mc.length} × ${mc.width} × ${mc.height} ${mc.unit}`,
+                    mcSpacing: mc.spacing || 0,
+                    boxSpacing: boxSpacing
+                });
+            });
+        }
+
+        // Generate loading pattern for visualization with spacing
+        function generateLoadingPattern(boxData, containerLength, containerWidth, containerHeight, maxBoxes, boxSpacing) {
+            const { lengthCount, widthCount, heightCount, boxLength, boxWidth, boxHeight, boxIndex } = boxData;
+            
+            // Calculate effective box dimensions with spacing
+            const boxWithSpacingLength = boxLength + (boxSpacing?.length || 0);
+            const boxWithSpacingWidth = boxWidth + (boxSpacing?.width || 0);
+            const boxWithSpacingHeight = boxHeight + (boxSpacing?.height || 0);
+            
+            let boxesAdded = 0;
+            
+            // Add wall clearance offset
+            const wallClearance = spacingConfig.wall;
+            
+            // Clear previous layers for this box type
+            for (let h = 0; h < heightCount && boxesAdded < maxBoxes; h++) {
+                if (!loadingData.layers[h]) {
+                    loadingData.layers[h] = {
+                        boxes: [],
+                        spacing: []
+                    };
+                }
+                
+                for (let l = 0; l < lengthCount && boxesAdded < maxBoxes; l++) {
+                    for (let w = 0; w < widthCount && boxesAdded < maxBoxes; w++) {
+                        // Calculate position in container (in cm) with wall clearance
+                        const x = wallClearance + (l * boxWithSpacingLength);
+                        const y = wallClearance + (w * boxWithSpacingWidth);
+                        const z = (h * boxWithSpacingHeight);
+                        
+                        // Add box to layer
+                        loadingData.layers[h].boxes.push({
+                            x: x,
+                            y: y,
+                            z: z,
+                            length: boxLength,
+                            width: boxWidth,
+                            height: boxHeight,
+                            spacingLength: boxSpacing?.length || 0,
+                            spacingWidth: boxSpacing?.width || 0,
+                            spacingHeight: boxSpacing?.height || 0,
+                            boxIndex: boxIndex,
+                            layer: h + 1
+                        });
+                        
+                        boxesAdded++;
+                    }
+                }
+            }
+            
+            // Generate spacing visualization data
+            if (boxSpacing && (boxSpacing.length > 0 || boxSpacing.width > 0 || boxSpacing.height > 0)) {
+                for (let h = 0; h < heightCount && boxesAdded < maxBoxes; h++) {
+                    if (!loadingData.layers[h].spacing) {
+                        loadingData.layers[h].spacing = [];
+                    }
+                    
+                    for (let l = 0; l < lengthCount && boxesAdded < maxBoxes; l++) {
+                        for (let w = 0; w < widthCount && boxesAdded < maxBoxes; w++) {
+                            // Calculate spacing positions
+                            const x = wallClearance + (l * boxWithSpacingLength) + boxLength;
+                            const y = wallClearance + (w * boxWithSpacingWidth) + boxWidth;
+                            const z = (h * boxWithSpacingHeight) + boxHeight;
+                            
+                            // Add horizontal spacing (between boxes in X direction)
+                            if (boxSpacing.length > 0 && l < lengthCount - 1) {
+                                loadingData.layers[h].spacing.push({
+                                    x: x,
+                                    y: wallClearance + (w * boxWithSpacingWidth),
+                                    z: (h * boxWithSpacingHeight),
+                                    length: boxSpacing.length,
+                                    width: boxWidth,
+                                    height: boxHeight,
+                                    type: 'horizontal'
+                                });
+                            }
+                            
+                            // Add vertical spacing (between boxes in Y direction)
+                            if (boxSpacing.width > 0 && w < widthCount - 1) {
+                                loadingData.layers[h].spacing.push({
+                                    x: wallClearance + (l * boxWithSpacingLength),
+                                    y: y,
+                                    z: (h * boxWithSpacingHeight),
+                                    length: boxLength,
+                                    width: boxSpacing.width,
+                                    height: boxHeight,
+                                    type: 'vertical'
+                                });
+                            }
+                            
+                            // Add height spacing (between boxes in Z direction)
+                            if (boxSpacing.height > 0 && h < heightCount - 1) {
+                                loadingData.layers[h].spacing.push({
+                                    x: wallClearance + (l * boxWithSpacingLength),
+                                    y: wallClearance + (w * boxWithSpacingWidth),
+                                    z: z,
+                                    length: boxLength,
+                                    width: boxWidth,
+                                    height: boxSpacing.height,
+                                    type: 'height'
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Update Pallet and MC results display
+        function updatePalletMCResults() {
+            palletMcResults.innerHTML = '';
+            
+            if (palletResults.length === 0 && mcResults.length === 0) {
+                palletMcResults.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--gray-dark);">
+                        <i class="fas fa-info-circle"></i> Add pallets and master cartons to see requirements
+                    </div>
+                `;
+                return;
+            }
+            
+            // Pallet Results
+            if (palletResults.length > 0) {
+                const palletResultDiv = document.createElement('div');
+                palletResultDiv.className = 'pallet-result';
+                
+                let palletHtml = `<h4><i class="fas fa-pallet"></i> Pallet Requirements</h4>`;
+                
+                // Group by box name
+                const boxGroups = {};
+                palletResults.forEach(result => {
+                    if (!boxGroups[result.boxName]) {
+                        boxGroups[result.boxName] = [];
+                    }
+                    boxGroups[result.boxName].push(result);
+                });
+                
+                Object.keys(boxGroups).forEach(boxName => {
+                    const boxResults = boxGroups[boxName];
+                    
+                    boxResults.forEach((result, idx) => {
+                        palletHtml += `
+                            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--gray);">
+                                <div style="font-weight: bold; color: var(--orange-dark); margin-bottom: 5px;">
+                                    ${result.boxName} on ${result.palletName}
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Total Boxes:</span>
+                                    <span class="detail-value">${result.totalBoxes.toLocaleString()}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Boxes per Pallet:</span>
+                                    <span class="detail-value">${result.boxesPerPallet}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Pallets Required:</span>
+                                    <span class="detail-value" style="color: var(--orange-dark); font-size: 1.1rem;">${result.palletsRequired}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Arrangement:</span>
+                                    <span class="detail-value">${result.palletLayerLength} × ${result.palletLayerWidth} × ${result.layersPerPallet}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Spacing:</span>
+                                    <span class="detail-value">Box: ${result.boxSpacing.length}×${result.boxSpacing.width}×${result.boxSpacing.height}cm, Pallet: ${result.palletSpacing}cm</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                });
+                
+                palletResultDiv.innerHTML = palletHtml;
+                palletMcResults.appendChild(palletResultDiv);
+            }
+            
+            // Master Carton Results
+            if (mcResults.length > 0) {
+                const mcResultDiv = document.createElement('div');
+                mcResultDiv.className = 'mc-result';
+                
+                let mcHtml = `<h4><i class="fas fa-boxes"></i> Master Carton Requirements</h4>`;
+                
+                // Group by box name
+                const boxGroupsMC = {};
+                mcResults.forEach(result => {
+                    if (!boxGroupsMC[result.boxName]) {
+                        boxGroupsMC[result.boxName] = [];
+                    }
+                    boxGroupsMC[result.boxName].push(result);
+                });
+                
+                Object.keys(boxGroupsMC).forEach(boxName => {
+                    const boxResults = boxGroupsMC[boxName];
+                    
+                    boxResults.forEach((result, idx) => {
+                        mcHtml += `
+                            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--gray);">
+                                <div style="font-weight: bold; color: var(--purple-dark); margin-bottom: 5px;">
+                                    ${result.boxName} in ${result.mcName}
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Total Boxes:</span>
+                                    <span class="detail-value">${result.totalBoxes.toLocaleString()}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Boxes per MC:</span>
+                                    <span class="detail-value">${result.boxesPerMC}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">MCs Required:</span>
+                                    <span class="detail-value" style="color: var(--purple-dark); font-size: 1.1rem;">${result.mcsRequired}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Arrangement:</span>
+                                    <span class="detail-value">${result.mcLayerLength} × ${result.mcLayerWidth} × ${result.layersPerMC}</span>
+                                </div>
+                                <div class="result-detail">
+                                    <span class="detail-label">Spacing:</span>
+                                    <span class="detail-value">Box: ${result.boxSpacing.length}×${result.boxSpacing.width}×${result.boxSpacing.height}cm, MC: ${result.mcSpacing}cm</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                });
+                
+                mcResultDiv.innerHTML = mcHtml;
+                palletMcResults.appendChild(mcResultDiv);
+            }
+        }
+
+        // Update results grid
+        function updateResultsGrid(boxResults, totalBoxes, utilizationPercentage, containerName) {
+            resultsGrid.innerHTML = '';
+            
+            // Add container type result card
+            resultsGrid.innerHTML += `
+                <div class="result-card">
+                    <div class="result-label">Container Type</div>
+                    <div class="result-value" style="font-size: 1.5rem;">${containerName}</div>
+                </div>
+            `;
+            
+            // Add total boxes result card
+            resultsGrid.innerHTML += `
+                <div class="result-card">
+                    <div class="result-label">Total Boxes</div>
+                    <div class="result-value">${totalBoxes.toLocaleString()}</div>
+                </div>
+            `;
+            
+            // Add utilization result card
+            resultsGrid.innerHTML += `
+                <div class="result-card">
+                    <div class="result-label">Space Utilization</div>
+                    <div class="result-value">${utilizationPercentage}%</div>
+                </div>
+            `;
+            
+            // Add spacing configuration result card
+            resultsGrid.innerHTML += `
+                <div class="result-card" style="border-top-color: var(--blue);">
+                    <div class="result-label">Spacing Applied</div>
+                    <div class="result-value" style="font-size: 1.2rem;">✓</div>
+                    <div class="result-label" style="font-size: 0.8rem; margin-top: 5px;">
+                        L:${spacingConfig.length}cm W:${spacingConfig.width}cm H:${spacingConfig.height}cm
+                    </div>
+                </div>
+            `;
+            
+            // Add result cards for each box type
+            boxResults.forEach((result, index) => {
+                const colorClass = index % 3 === 0 ? 'indigo' : (index % 3 === 1 ? 'green' : 'blue');
+                const color = colorClass === 'indigo' ? 'var(--indigo)' : (colorClass === 'green' ? 'var(--green)' : 'var(--blue)');
+                
+                const spacingInfo = result.spacing ? 
+                    `<div class="result-label" style="font-size: 0.8rem; margin-top: 3px; color: var(--blue);">
+                        Spacing: ${result.spacing.length}×${result.spacing.width}×${result.spacing.height}cm
+                    </div>` : '';
+                
+                resultsGrid.innerHTML += `
+                    <div class="result-card" style="border-top-color: ${color}">
+                        <div class="result-label">${result.name}</div>
+                        <div class="result-value">${result.boxCount.toLocaleString()}</div>
+                        <div class="result-label" style="font-size: 0.8rem; margin-top: 5px;">
+                            ${result.dimensions}
+                        </div>
+                        <div class="result-label" style="font-size: 0.8rem; margin-top: 3px;">
+                            Arrangement: ${result.lengthCount} × ${result.widthCount} × ${result.heightCount}
+                        </div>
+                        ${spacingInfo}
+                    </div>
+                `;
+            });
+        }
+
+        // Update loading visualization with spacing
+        function updateLoadingVisualization() {
+            loadingVisualization.innerHTML = '<div class="container-outline"></div>';
+            
+            if (loadingData.layers.length === 0 || boxSizes.length === 0) {
+                loadingVisualization.innerHTML += `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--gray-dark);">
+                        <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <div>No boxes to display. Add box sizes and calculate loading plan.</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Container dimensions in cm
+            const container = containerData[currentContainer];
+            const containerLength = container.length_cm;
+            const containerWidth = container.width_cm;
+            
+            // Visualization dimensions
+            const vizWidth = loadingVisualization.offsetWidth - 20; // 10px padding on each side
+            const vizHeight = loadingVisualization.offsetHeight - 20;
+            
+            // Scale factors to convert cm to pixels
+            const scaleX = vizWidth / containerLength;
+            const scaleY = vizHeight / containerWidth;
+            
+            // Determine which layers to show
+            let boxesToShow = [];
+            let spacingToShow = [];
+            
+            if (loadingData.currentLayer === 'all') {
+                // Show all layers
+                loadingData.layers.forEach(layer => {
+                    boxesToShow = boxesToShow.concat(layer.boxes);
+                    if (loadingData.showSpacing && layer.spacing) {
+                        spacingToShow = spacingToShow.concat(layer.spacing);
+                    }
+                });
+            } else {
+                // Show specific layer (1-indexed)
+                const layerIndex = loadingData.currentLayer - 1;
+                if (loadingData.layers[layerIndex]) {
+                    boxesToShow = loadingData.layers[layerIndex].boxes;
+                    if (loadingData.showSpacing && loadingData.layers[layerIndex].spacing) {
+                        spacingToShow = loadingData.layers[layerIndex].spacing;
+                    }
+                }
+            }
+            
+            // Show wall clearance
+            if (loadingData.showSpacing && spacingConfig.wall > 0) {
+                // Left wall clearance
+                const wallSpacingLeft = document.createElement('div');
+                wallSpacingLeft.className = 'spacing-visual';
+                wallSpacingLeft.style.left = '10px';
+                wallSpacingLeft.style.top = '10px';
+                wallSpacingLeft.style.width = `${spacingConfig.wall * scaleX}px`;
+                wallSpacingLeft.style.height = `${vizHeight}px`;
+                wallSpacingLeft.title = `Wall clearance: ${spacingConfig.wall}cm`;
+                loadingVisualization.appendChild(wallSpacingLeft);
+                
+                // Right wall clearance
+                const wallSpacingRight = document.createElement('div');
+                wallSpacingRight.className = 'spacing-visual';
+                wallSpacingRight.style.right = '10px';
+                wallSpacingRight.style.top = '10px';
+                wallSpacingRight.style.width = `${spacingConfig.wall * scaleX}px`;
+                wallSpacingRight.style.height = `${vizHeight}px`;
+                wallSpacingRight.title = `Wall clearance: ${spacingConfig.wall}cm`;
+                loadingVisualization.appendChild(wallSpacingRight);
+                
+                // Top wall clearance (width-wise)
+                const wallSpacingTop = document.createElement('div');
+                wallSpacingTop.className = 'spacing-visual';
+                wallSpacingTop.style.left = `${10 + (spacingConfig.wall * scaleX)}px`;
+                wallSpacingTop.style.top = '10px';
+                wallSpacingTop.style.width = `${vizWidth - (2 * spacingConfig.wall * scaleX)}px`;
+                wallSpacingTop.style.height = `${spacingConfig.wall * scaleY}px`;
+                wallSpacingTop.title = `Wall clearance: ${spacingConfig.wall}cm`;
+                loadingVisualization.appendChild(wallSpacingTop);
+                
+                // Bottom wall clearance (width-wise)
+                const wallSpacingBottom = document.createElement('div');
+                wallSpacingBottom.className = 'spacing-visual';
+                wallSpacingBottom.style.left = `${10 + (spacingConfig.wall * scaleX)}px`;
+                wallSpacingBottom.style.bottom = '10px';
+                wallSpacingBottom.style.width = `${vizWidth - (2 * spacingConfig.wall * scaleX)}px`;
+                wallSpacingBottom.style.height = `${spacingConfig.wall * scaleY}px`;
+                wallSpacingBottom.title = `Wall clearance: ${spacingConfig.wall}cm`;
+                loadingVisualization.appendChild(wallSpacingBottom);
+            }
+            
+            // Render spacing areas
+            if (loadingData.showSpacing) {
+                spacingToShow.forEach((spacing, index) => {
+                    // Calculate position in visualization (in pixels)
+                    const x = 10 + (spacing.x * scaleX);
+                    const y = 10 + (spacing.y * scaleY);
+                    const width = spacing.length * scaleX;
+                    const height = spacing.width * scaleY;
+                    
+                    // Create spacing element
+                    const spacingElement = document.createElement('div');
+                    spacingElement.className = 'spacing-visual';
+                    spacingElement.style.left = `${x}px`;
+                    spacingElement.style.top = `${y}px`;
+                    spacingElement.style.width = `${width}px`;
+                    spacingElement.style.height = `${height}px`;
+                    spacingElement.title = `${spacing.type} spacing: ${spacing.length}×${spacing.width}cm`;
+                    
+                    // Different opacity based on spacing type
+                    if (spacing.type === 'horizontal') {
+                        spacingElement.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                    } else if (spacing.type === 'vertical') {
+                        spacingElement.style.backgroundColor = 'rgba(59, 130, 246, 0.3)';
+                    } else {
+                        spacingElement.style.backgroundColor = 'rgba(59, 130, 246, 0.4)';
+                    }
+                    
+                    loadingVisualization.appendChild(spacingElement);
+                });
+            }
+            
+            // Render boxes
+            boxesToShow.forEach((box, index) => {
+                // Calculate position in visualization (in pixels)
+                const x = 10 + (box.x * scaleX);
+                const y = 10 + (box.y * scaleY);
+                const width = box.length * scaleX;
+                const height = box.width * scaleY;
+                
+                // Determine color based on box type
+                let color;
+                if (box.boxIndex % 3 === 0) {
+                    color = 'var(--green)';
+                } else if (box.boxIndex % 3 === 1) {
+                    color = 'var(--blue)';
+                } else {
+                    color = 'var(--orange)';
+                }
+                
+                // Create box element
+                const boxElement = document.createElement('div');
+                boxElement.className = 'loaded-box';
+                boxElement.style.left = `${x}px`;
+                boxElement.style.top = `${y}px`;
+                boxElement.style.width = `${width}px`;
+                boxElement.style.height = `${height}px`;
+                boxElement.style.backgroundColor = color;
+                boxElement.style.borderColor = color === 'var(--green)' ? 'var(--green-dark)' : 
+                                             color === 'var(--blue)' ? 'var(--blue-dark)' : 'var(--orange-dark)';
+                boxElement.style.opacity = loadingData.currentLayer === 'all' ? 
+                    (0.8 - (box.layer * 0.1)) : 0.9;
+                boxElement.style.zIndex = box.layer * 10 + (loadingData.showSpacing ? 0 : 1);
+                boxElement.title = `${boxSizes[box.boxIndex].name}, Layer ${box.layer}`;
+                boxElement.innerHTML = `<span style="font-size: ${Math.max(8, Math.min(width, height) * 0.3)}px">${box.boxIndex + 1}</span>`;
+                
+                // Add animation delay for sequential appearance
+                boxElement.style.animation = `boxLoad 0.5s ease ${index * 0.02}s both`;
+                
+                loadingVisualization.appendChild(boxElement);
+            });
+            
+            // Add layer indicator
+            if (loadingData.currentLayer !== 'all' && loadingData.currentLayer !== 'spacing') {
+                const layerIndicator = document.createElement('div');
+                layerIndicator.style.position = 'absolute';
+                layerIndicator.style.top = '10px';
+                layerIndicator.style.right = '10px';
+                layerIndicator.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                layerIndicator.style.color = 'white';
+                layerIndicator.style.padding = '5px 10px';
+                layerIndicator.style.borderRadius = '4px';
+                layerIndicator.style.fontSize = '0.8rem';
+                layerIndicator.style.fontWeight = 'bold';
+                layerIndicator.textContent = `Layer ${loadingData.currentLayer}`;
+                loadingVisualization.appendChild(layerIndicator);
+            }
+            
+            // Add spacing indicator
+            if (loadingData.showSpacing) {
+                const spacingIndicator = document.createElement('div');
+                spacingIndicator.style.position = 'absolute';
+                spacingIndicator.style.top = '10px';
+                spacingIndicator.style.left = '10px';
+                spacingIndicator.style.backgroundColor = 'rgba(59, 130, 246, 0.8)';
+                spacingIndicator.style.color = 'white';
+                spacingIndicator.style.padding = '5px 10px';
+                spacingIndicator.style.borderRadius = '4px';
+                spacingIndicator.style.fontSize = '0.8rem';
+                spacingIndicator.style.fontWeight = 'bold';
+                spacingIndicator.textContent = 'Spacing View';
+                loadingVisualization.appendChild(spacingIndicator);
+            }
+        }
+
+        // Update loading steps
+        function updateLoadingSteps() {
+            // Clear existing steps
+            loadingSteps.forEach(step => {
+                step.style.display = 'none';
+            });
+            
+            // Show available layers
+            const maxLayers = Math.min(loadingData.layers.length, 3);
+            
+            for (let i = 0; i < maxLayers; i++) {
+                if (loadingSteps[i]) {
+                    loadingSteps[i].style.display = 'block';
+                    loadingSteps[i].textContent = `Layer ${i + 1}`;
+                    loadingSteps[i].dataset.step = i + 1;
+                }
+            }
+            
+            // Show "All Layers" option
+            if (loadingSteps[3]) {
+                loadingSteps[3].style.display = 'block';
+                loadingSteps[3].dataset.step = 'all';
+            }
+            
+            // Show "Show Spacing" option
+            if (loadingSteps[4]) {
+                loadingSteps[4].style.display = 'block';
+                loadingSteps[4].dataset.step = 'spacing';
+            }
+            
+            // Set first layer as active if not showing spacing
+            if (!loadingData.showSpacing) {
+                loadingSteps.forEach(step => step.classList.remove('active'));
+                if (loadingSteps[0]) {
+                    loadingSteps[0].classList.add('active');
+                    loadingData.currentLayer = 1;
+                }
+            } else {
+                loadingSteps.forEach(step => step.classList.remove('active'));
+                if (loadingSteps[4]) {
+                    loadingSteps[4].classList.add('active');
+                }
+            }
+        }
+
+        // Open PDF export modal
+        function openPdfExportModal() {
+            if (boxSizes.length === 0) {
+                alert('Please add box sizes and calculate loading plan before exporting.');
+                return;
+            }
+            
+            // Set default PDF title
+            document.getElementById('pdf-title').value = `Ceylon Tea Loading Plan - ${calculationResults.containerName}`;
+            pdfExportModal.classList.add('active');
+        }
+
+        // Generate PDF report with spacing details
+        function generatePdfReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // Get user inputs
+            const title = document.getElementById('pdf-title').value || 'Ceylon Tea Loading Plan';
+            const includeSummary = document.getElementById('include-summary').checked;
+            const includeBoxDetails = document.getElementById('include-box-details').checked;
+            const includePalletMC = document.getElementById('include-pallet-mc').checked;
+            const includeSpacingDetails = document.getElementById('include-spacing-details').checked;
+            const includeLoadingPattern = document.getElementById('include-loading-pattern').checked;
+            const notes = document.getElementById('pdf-notes').value;
+            
+            let yPos = 20;
+            
+            // Header
+            doc.setFontSize(22);
+            doc.setTextColor(79, 70, 229); // Indigo
+            doc.text(title, 105, yPos, { align: 'center' });
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated: ${calculationResults.timestamp}`, 105, yPos, { align: 'center' });
+            yPos += 15;
+            
+            // Executive Summary
+            if (includeSummary) {
+                doc.setFontSize(16);
+                doc.setTextColor(30, 30, 30);
+                doc.text('Executive Summary', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(60, 60, 60);
+                
+                const summaryLines = [
+                    `Container: ${calculationResults.containerName}`,
+                    `Dimensions: ${(calculationResults.containerLength/100).toFixed(2)}m × ${(calculationResults.containerWidth/100).toFixed(2)}m × ${(calculationResults.containerHeight/100).toFixed(2)}m`,
+                    `Total Boxes: ${calculationResults.totalBoxes.toLocaleString()}`,
+                    `Space Utilization: ${calculationResults.utilizationPercentage}%`,
+                    `Total Volume: ${(calculationResults.containerVolume/1000000).toFixed(2)} m³`,
+                    `Spacing Applied: Yes (L:${spacingConfig.length}cm, W:${spacingConfig.width}cm, H:${spacingConfig.height}cm)`
+                ];
+                
+                summaryLines.forEach(line => {
+                    doc.text(line, 25, yPos);
+                    yPos += 7;
+                });
+                
+                yPos += 5;
+            }
+            
+            // Spacing Configuration
+            if (includeSpacingDetails) {
+                doc.setFontSize(16);
+                doc.setTextColor(30, 30, 30);
+                doc.text('Spacing Configuration', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(60, 60, 60);
+                
+                const spacingLines = [
+                    `Length Spacing (between boxes): ${spacingConfig.length} cm`,
+                    `Width Spacing (between boxes): ${spacingConfig.width} cm`,
+                    `Height Spacing (between boxes): ${spacingConfig.height} cm`,
+                    `Wall Clearance: ${spacingConfig.wall} cm`,
+                    `Effective Container Dimensions:`,
+                    `  Length: ${(calculationResults.effectiveContainerLength/100).toFixed(2)}m (reduced by spacing)`,
+                    `  Width: ${(calculationResults.effectiveContainerWidth/100).toFixed(2)}m (reduced by spacing)`,
+                    `  Height: ${(calculationResults.effectiveContainerHeight/100).toFixed(2)}m (reduced by spacing)`
+                ];
+                
+                spacingLines.forEach(line => {
+                    doc.text(line, 25, yPos);
+                    yPos += 7;
+                });
+                
+                yPos += 5;
+            }
+            
+            // Box Details with Spacing
+            if (includeBoxDetails && calculationResults.boxResults.length > 0) {
+                doc.setFontSize(16);
+                doc.setTextColor(30, 30, 30);
+                doc.text('Box Loading Details (with Spacing)', 20, yPos);
+                yPos += 10;
+                
+                // Create table
+                const tableColumn = ["Box Name", "Dimensions", "Spacing", "Qty", "Max Fit", "Arrangement"];
+                const tableRows = [];
+                
+                calculationResults.boxResults.forEach(box => {
+                    const spacingText = box.spacing ? 
+                        `${box.spacing.length}×${box.spacing.width}×${box.spacing.height}cm` : 'None';
+                    
+                    tableRows.push([
+                        box.name,
+                        box.dimensions,
+                        spacingText,
+                        box.requestedQuantity.toString(),
+                        box.boxCount.toString(),
+                        `${box.lengthCount} × ${box.widthCount} × ${box.heightCount}`
+                    ]);
+                });
+                
+                doc.autoTable({
+                    startY: yPos,
+                    head: [tableColumn],
+                    body: tableRows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [79, 70, 229] },
+                    margin: { left: 20, right: 20 }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // Pallet & Master Carton Details
+            if (includePalletMC && calculationResults.palletResults.length > 0) {
+                doc.setFontSize(16);
+                doc.setTextColor(30, 30, 30);
+                doc.text('Pallet & Master Carton Requirements', 20, yPos);
+                yPos += 10;
+                
+                // Pallet Table
+                doc.setFontSize(12);
+                doc.setTextColor(245, 158, 11); // Orange
+                doc.text('Pallet Requirements (with spacing):', 25, yPos);
+                yPos += 8;
+                
+                const palletTableColumn = ["Box", "Pallet", "Total", "Per Pallet", "Pallets", "Spacing"];
+                const palletTableRows = [];
+                
+                calculationResults.palletResults.forEach(result => {
+                    const spacingText = `Box:${result.boxSpacing.length}×${result.boxSpacing.width}×${result.boxSpacing.height}cm, Pallet:${result.palletSpacing}cm`;
+                    
+                    palletTableRows.push([
+                        result.boxName,
+                        result.palletName,
+                        result.totalBoxes.toString(),
+                        result.boxesPerPallet.toString(),
+                        result.palletsRequired.toString(),
+                        spacingText
+                    ]);
+                });
+                
+                doc.autoTable({
+                    startY: yPos,
+                    head: [palletTableColumn],
+                    body: palletTableRows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [245, 158, 11] },
+                    margin: { left: 25, right: 20 }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 15;
+                
+                // Master Carton Table
+                doc.setFontSize(12);
+                doc.setTextColor(139, 92, 246); // Purple
+                doc.text('Master Carton Requirements (with spacing):', 25, yPos);
+                yPos += 8;
+                
+                const mcTableColumn = ["Box", "MC", "Total", "Per MC", "MCs", "Spacing"];
+                const mcTableRows = [];
+                
+                calculationResults.mcResults.forEach(result => {
+                    const spacingText = `Box:${result.boxSpacing.length}×${result.boxSpacing.width}×${result.boxSpacing.height}cm, MC:${result.mcSpacing}cm`;
+                    
+                    mcTableRows.push([
+                        result.boxName,
+                        result.mcName,
+                        result.totalBoxes.toString(),
+                        result.boxesPerMC.toString(),
+                        result.mcsRequired.toString(),
+                        spacingText
+                    ]);
+                });
+                
+                doc.autoTable({
+                    startY: yPos,
+                    head: [mcTableColumn],
+                    body: mcTableRows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [139, 92, 246] },
+                    margin: { left: 25, right: 20 }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // Notes
+            if (notes) {
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.setFontSize(16);
+                doc.setTextColor(30, 30, 30);
+                doc.text('Additional Notes', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(60, 60, 60);
+                
+                const splitNotes = doc.splitTextToSize(notes, 170);
+                doc.text(splitNotes, 25, yPos);
+                yPos += (splitNotes.length * 7) + 10;
+            }
+            
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Ceylon Tea Loading System - Page ${i} of ${pageCount}`, 105, 287, { align: 'center' });
+                doc.text(`© ${new Date().getFullYear()} Ceylon Tea Export Logistics`, 105, 292, { align: 'center' });
+            }
+            
+            // Save PDF
+            doc.save(`Ceylon_Tea_Loading_Plan_${new Date().toISOString().slice(0,10)}.pdf`);
+            
+            // Close modal
+            pdfExportModal.classList.remove('active');
+            
+            // Show success message
+            showNotification('PDF report generated successfully!', 'success');
+        }
+
+        // Open detailed report modal
+        function openDetailedReport() {
+            if (boxSizes.length === 0) {
+                alert('Please add box sizes and calculate loading plan before viewing report.');
+                return;
+            }
+            
+            // Generate report content with spacing details
+            let reportHTML = `
+                <div style="padding: 20px; background: white; border-radius: 8px;">
+                    <h2 style="color: var(--indigo-dark); margin-bottom: 20px; border-bottom: 2px solid var(--indigo); padding-bottom: 10px;">
+                        <i class="fas fa-file-alt"></i> Detailed Loading Report with Spacing
+                    </h2>
+                    
+                    <div style="margin-bottom: 25px; padding: 15px; background: linear-gradient(135deg, #f0f4ff 0%, #f0fff4 100%); border-radius: 8px;">
+                        <h3 style="color: var(--indigo-dark); margin-bottom: 15px;">Executive Summary</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div style="padding: 10px; background: white; border-radius: 6px; border-left: 4px solid var(--indigo);">
+                                <div style="font-size: 0.9rem; color: var(--gray-dark);">Container</div>
+                                <div style="font-weight: bold; font-size: 1.1rem;">${calculationResults.containerName}</div>
+                            </div>
+                            <div style="padding: 10px; background: white; border-radius: 6px; border-left: 4px solid var(--green);">
+                                <div style="font-size: 0.9rem; color: var(--gray-dark);">Total Boxes</div>
+                                <div style="font-weight: bold; font-size: 1.1rem;">${calculationResults.totalBoxes.toLocaleString()}</div>
+                            </div>
+                            <div style="padding: 10px; background: white; border-radius: 6px; border-left: 4px solid var(--orange);">
+                                <div style="font-size: 0.9rem; color: var(--gray-dark);">Space Utilization</div>
+                                <div style="font-weight: bold; font-size: 1.1rem;">${calculationResults.utilizationPercentage}%</div>
+                            </div>
+                            <div style="padding: 10px; background: white; border-radius: 6px; border-left: 4px solid var(--blue);">
+                                <div style="font-size: 0.9rem; color: var(--gray-dark);">Spacing Applied</div>
+                                <div style="font-weight: bold; font-size: 1.1rem;">✓ Yes</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: var(--indigo-dark); margin-bottom: 15px;">Spacing Configuration</h3>
+                        <div style="background: white; border-radius: 8px; padding: 15px; border: 1px solid var(--gray);">
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; text-align: center;">
+                                <div style="padding: 15px; background: #eff6ff; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: var(--blue-dark);">Length Spacing</div>
+                                    <div style="font-weight: bold; font-size: 1.2rem;">${spacingConfig.length} cm</div>
+                                    <div style="font-size: 0.8rem; color: var(--gray-dark);">Between boxes lengthwise</div>
+                                </div>
+                                <div style="padding: 15px; background: #eff6ff; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: var(--blue-dark);">Width Spacing</div>
+                                    <div style="font-weight: bold; font-size: 1.2rem;">${spacingConfig.width} cm</div>
+                                    <div style="font-size: 0.8rem; color: var(--gray-dark);">Between boxes widthwise</div>
+                                </div>
+                                <div style="padding: 15px; background: #eff6ff; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: var(--blue-dark);">Height Spacing</div>
+                                    <div style="font-weight: bold; font-size: 1.2rem;">${spacingConfig.height} cm</div>
+                                    <div style="font-size: 0.8rem; color: var(--gray-dark);">Between boxes vertically</div>
+                                </div>
+                                <div style="padding: 15px; background: #eff6ff; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: var(--blue-dark);">Wall Clearance</div>
+                                    <div style="font-weight: bold; font-size: 1.2rem;">${spacingConfig.wall} cm</div>
+                                    <div style="font-size: 0.8rem; color: var(--gray-dark);">From container walls</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px; padding: 10px; background: #f0f9ff; border-radius: 6px;">
+                                <div><strong>Effective Container Dimensions (after spacing):</strong></div>
+                                <div>Length: ${(calculationResults.effectiveContainerLength/100).toFixed(2)}m (reduced by ${(2*spacingConfig.wall/100).toFixed(2)}m)</div>
+                                <div>Width: ${(calculationResults.effectiveContainerWidth/100).toFixed(2)}m (reduced by ${(2*spacingConfig.wall/100).toFixed(2)}m)</div>
+                                <div>Height: ${(calculationResults.effectiveContainerHeight/100).toFixed(2)}m (reduced by ${(spacingConfig.wall/100).toFixed(2)}m)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: var(--indigo-dark); margin-bottom: 15px;">Box Loading Details with Spacing</h3>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: var(--indigo); color: white;">
+                                        <th style="padding: 12px; text-align: left;">Box Name</th>
+                                        <th style="padding: 12px; text-align: left;">Dimensions</th>
+                                        <th style="padding: 12px; text-align: left;">Spacing</th>
+                                        <th style="padding: 12px; text-align: left;">Available Qty</th>
+                                        <th style="padding: 12px; text-align: left;">Maximum Fit</th>
+                                        <th style="padding: 12px; text-align: left;">Arrangement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
+            
+            calculationResults.boxResults.forEach((box, index) => {
+                const rowColor = index % 2 === 0 ? '#f9fafb' : 'white';
+                const spacingText = box.spacing ? 
+                    `L:${box.spacing.length}cm W:${box.spacing.width}cm H:${box.spacing.height}cm` : 'None';
+                
+                reportHTML += `
+                    <tr style="background: ${rowColor};">
+                        <td style="padding: 12px; border-bottom: 1px solid var(--gray);">${box.name}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid var(--gray);">${box.dimensions}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid var(--gray); color: var(--blue);">${spacingText}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid var(--gray);">${box.requestedQuantity.toLocaleString()}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid var(--gray); font-weight: bold;">${box.boxCount.toLocaleString()}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid var(--gray);">${box.lengthCount} × ${box.widthCount} × ${box.heightCount}</td>
+                    </tr>
+                `;
+            });
+            
+            reportHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: var(--indigo-dark); margin-bottom: 15px;">Storage Requirements with Spacing</h3>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                            <div style="padding: 15px; background: #fffbeb; border-radius: 8px; border-left: 4px solid var(--orange);">
+                                <h4 style="color: var(--orange-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-pallet"></i> Pallet Requirements
+                                </h4>
+            `;
+            
+            calculationResults.palletResults.forEach(result => {
+                const spacingText = `Box: ${result.boxSpacing.length}×${result.boxSpacing.width}×${result.boxSpacing.height}cm, Pallet: ${result.palletSpacing}cm`;
+                
+                reportHTML += `
+                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(245, 158, 11, 0.3);">
+                        <div style="font-weight: bold; color: var(--orange-dark); margin-bottom: 8px;">${result.boxName} on ${result.palletName}</div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Total Boxes:</span>
+                            <span style="font-weight: bold;">${result.totalBoxes.toLocaleString()}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Boxes per Pallet:</span>
+                            <span>${result.boxesPerPallet}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Pallets Required:</span>
+                            <span style="font-weight: bold; color: var(--orange-dark);">${result.palletsRequired}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Arrangement:</span>
+                            <span>${result.palletLayerLength} × ${result.palletLayerWidth} × ${result.layersPerPallet}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Spacing:</span>
+                            <span style="color: var(--blue); font-size: 0.9rem;">${spacingText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reportHTML += `
+                            </div>
+                            
+                            <div style="padding: 15px; background: #f5f3ff; border-radius: 8px; border-left: 4px solid var(--purple);">
+                                <h4 style="color: var(--purple-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-boxes"></i> Master Carton Requirements
+                                </h4>
+            `;
+            
+            calculationResults.mcResults.forEach(result => {
+                const spacingText = `Box: ${result.boxSpacing.length}×${result.boxSpacing.width}×${result.boxSpacing.height}cm, MC: ${result.mcSpacing}cm`;
+                
+                reportHTML += `
+                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(139, 92, 246, 0.3);">
+                        <div style="font-weight: bold; color: var(--purple-dark); margin-bottom: 8px;">${result.boxName} in ${result.mcName}</div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Total Boxes:</span>
+                            <span style="font-weight: bold;">${result.totalBoxes.toLocaleString()}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Boxes per MC:</span>
+                            <span>${result.boxesPerMC}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>MCs Required:</span>
+                            <span style="font-weight: bold; color: var(--purple-dark);">${result.mcsRequired}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Arrangement:</span>
+                            <span>${result.mcLayerLength} × ${result.mcLayerWidth} × ${result.layersPerMC}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Spacing:</span>
+                            <span style="color: var(--blue); font-size: 0.9rem;">${spacingText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reportHTML += `
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="color: var(--gray-dark); font-size: 0.9rem; text-align: center; padding: 20px; border-top: 1px solid var(--gray);">
+                        <div>Report generated on ${calculationResults.timestamp}</div>
+                        <div>Ceylon Tea Loading System © ${new Date().getFullYear()}</div>
+                    </div>
+                </div>
+            `;
+            
+            reportContent.innerHTML = reportHTML;
+            reportModal.classList.add('active');
+        }
+
+        // Print report content
+        function printReportContent() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Ceylon Tea Loading Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; }
+                            h1, h2, h3 { color: #3730a3; }
+                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            th { background: #4f46e5; color: white; padding: 12px; text-align: left; }
+                            td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+                            .summary-box { display: inline-block; padding: 15px; margin: 10px; background: #f9fafb; border-radius: 8px; border-left: 4px solid; }
+                            .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; text-align: center; }
+                            .pallet-section { background: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 15px 0; }
+                            .mc-section { background: #f5f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6; margin: 15px 0; }
+                            .spacing-section { background: #eff6ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6; margin: 15px 0; }
+                        </style>
+                    </head>
+                    <body>
+                        ${reportContent.innerHTML}
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
+        // Initialize the page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

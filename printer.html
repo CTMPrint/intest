@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Printout Data Analysis Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Add html2canvas and jsPDF libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --secondary: #6c757d;
+            --success: #198754;
+            --info: #0dcaf0;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        body { 
+            background-color: #f8f9fa; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .card { 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); 
+            border-radius: 12px; 
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chart-container { 
+            position: relative; 
+            height: 40vh;
+            width: 100%;
+        }
+        
+        /* Custom color classes for summary cards */
+        .card-total { background: linear-gradient(45deg, var(--primary), #007bff); color: white; }
+        .card-top-user { background: linear-gradient(45deg, var(--success), #28a745); color: white; }
+        .card-date { background: linear-gradient(45deg, var(--warning), #fd7e14); color: white; }
+        
+        .upload-area {
+            background-color: #ffffff;
+            border: 2px dashed var(--primary);
+            padding: 30px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--success);
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary), #6610f2);
+            color: white;
+            padding: 2rem 0;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            margin: 2rem 0 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+        
+        .date-filter-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .date-filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background: var(--success);
+            transform: translateY(-2px);
+        }
+        
+        .user-selector {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .user-checkbox {
+            margin-right: 8px;
+        }
+        
+        .user-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f1f1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .user-btn {
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .user-btn-export {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .user-btn-export:hover {
+            background-color: #0b5ed7;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .flatpickr-input {
+            background-color: white;
+        }
+        
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .progress {
+            height: 8px;
+            margin-top: 5px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary);
+        }
+        
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        /* PDF Export Button Styles */
+        .export-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+        
+        .export-btn {
+            background: linear-gradient(45deg, var(--danger), #dc3545);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .export-btn:hover {
+            background: linear-gradient(45deg, #dc3545, #bb2d3b);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .export-options {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--danger);
+        }
+        
+        .export-option-label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        /* Loading overlay for PDF generation */
+        .pdf-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            display: none;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+                font-size: 12pt;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            .chart-container {
+                height: 300px;
+            }
+        }
+        
+        /* Simple table for PDF */
+        .simple-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 10pt;
+        }
+        
+        .simple-table th {
+            background-color: #0d6efd;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        .simple-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .simple-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        /* Bulk export section */
+        .bulk-export-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f3ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--info);
+        }
+        
+        .bulk-export-btn {
+            background: linear-gradient(45deg, var(--info), #0dcaf0);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .bulk-export-btn:hover {
+            background: linear-gradient(45deg, #0dcaf0, #0ba9d4);
+            transform: translateY(-2px);
+        }
+        
+        .user-print-count {
+            font-size: 0.85rem;
+            color: var(--success);
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        /* Master export section */
+        .master-export-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #d4edda;
+            border-radius: 8px;
+            border-left: 4px solid var(--success);
+        }
+        
+        .master-export-btn {
+            background: linear-gradient(45deg, var(--success), #28a745);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .master-export-btn:hover {
+            background: linear-gradient(45deg, #28a745, #218838);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PDF Loading Overlay -->
+    <div id="pdfLoadingOverlay" class="pdf-loading-overlay">
+        <div class="spinner"></div>
+        <h4 id="loadingMessage">Generating PDF Report...</h4>
+        <p>Please wait while we prepare your report</p>
+        <div id="progressContainer" style="width: 300px; margin-top: 20px; display: none;">
+            <div class="progress" style="height: 10px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: 0%"></div>
+            </div>
+            <div id="progressText" class="text-center mt-2">0/0 users processed</div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-0">
+        <div class="dashboard-header">
+            <div class="container">
+                <header class="text-center mb-4">
+                    <h1 class="display-5 fw-bold">📊 Printout Data Analysis Dashboard</h1>
+                    <p class="lead mb-0">Upload a CSV file to analyze and summarize printout data</p>
+                </header>
+            </div>
+        </div>
+        
+        <div class="container py-4">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8">
+                    <div class="upload-area text-center">
+                        <label for="csvFile" class="form-label fw-bold text-dark">Select CSV File (.csv only):</label>
+                        <input class="form-control form-control-lg" type="file" id="csvFile" accept=".csv">
+                        <div class="mt-2">
+                            <small class="text-muted">Expected columns: Pages, Sets, User Name, Date Time, Department Number, Document Name</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboardContent" style="display: none;">
+                
+                <div class="export-section fade-in">
+                    <h3 class="mb-4">📤 Export Reports</h3>
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-8">
+                            <p class="mb-0">Export reports as PDF documents including all charts and data tables.</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button id="exportPDF" class="btn export-btn w-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-pdf" viewBox="0 0 16 16">
+                                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5zM4.603 12.087a.81.81 0 0 1-.246.463.86.86 0 0 1-.537.184.86.86 0 0 1-.534-.184.835.835 0 0 1-.245-.463c-.055-.17-.082-.414-.082-.734v-1.305c0-.653.098-1.152.293-1.495.2-.348.526-.522.977-.522.322 0 .568.064.737.192.174.128.26.33.26.606 0 .283-.088.49-.264.62a.78.78 0 0 1-.426.147.75.75 0 0 1-.255-.043.9.9 0 0 1-.245-.127.38.38 0 0 0-.153-.031H4.18v.791h.48c.194 0 .347.02.458.06.116.043.174.106.174.192 0 .086-.058.15-.174.192a1.2 1.2 0 0 1-.458.06h-.48v.715c0 .22.02.375.06.474.04.1.11.165.21.198.104.033.223.05.358.05.11 0 .205-.013.285-.04.08-.027.142-.067.186-.123.048-.06.072-.136.072-.23 0-.09-.023-.163-.07-.22a.38.38 0 0 0-.187-.087 1.8 1.8 0 0 0-.275-.033h-.422zm1.188-3.227v3.227c0 .653.098 1.152.293 1.495.2.348.526.522.977.522.45 0 .776-.174.977-.522.195-.343.293-.842.293-1.495v-3.227c0-.653-.098-1.152-.293-1.495-.2-.348-.527-.522-.977-.522-.451 0-.776.174-.977.522-.195.343-.293.842-.293 1.495m1.574.788h1.5v2.65c0 .183-.016.322-.047.417a.56.56 0 0 1-.164.257.634.634 0 0 1-.312.14.722.722 0 0 1-.367-.01.594.594 0 0 1-.255-.16.562.562 0 0 1-.143-.255 1.47 1.47 0 0 1-.022-.402zm2.576-3.017v.793h.688c.202 0 .36-.04.473-.12a.55.55 0 0 0 .186-.294.74.74 0 0 0 0-.346.55.55 0 0 0-.186-.294c-.114-.079-.271-.12-.473-.12h-.688zm.813.793v2.65c0 .183-.015.322-.046.417a.56.56 0 0 1-.164.257.634.634 0 0 1-.312.14.722.722 0 0 1-.368-.01.594.594 0 0 1-.255-.16.562.562 0 0 1-.142-.255 1.47 1.47 0 0 1-.022-.402v-2.187h-.79v2.716c0 .416.053.728.158.938.11.21.274.365.492.466a1.4 1.4 0 0 0 .687.158c.276 0 .518-.053.726-.158.21-.11.37-.256.48-.466.105-.21.158-.522.158-.938v-2.716z"/>
+                                </svg>
+                                Export Full Dashboard to PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="export-options">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeCharts" checked>
+                                    <label class="form-check-label export-option-label" for="includeCharts">
+                                        Include Charts
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeTables" checked>
+                                    <label class="form-check-label export-option-label" for="includeTables">
+                                        Include Data Tables
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeSummary" checked>
+                                    <label class="form-check-label export-option-label" for="includeSummary">
+                                        Include Summary
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="master-export-section">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">📋 Export Master User-Document Report</h5>
+                                <p class="mb-0">Generate a single PDF with ALL users, their documents, and page counts for the selected date range.</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button id="exportMasterReport" class="btn master-export-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-collection me-1" viewBox="0 0 16 16">
+                                        <path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6zm1.5.5A.5.5 0 0 1 1 13V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5z"/>
+                                    </svg>
+                                    Export Master Report
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeAllUsers" checked>
+                                    <label class="form-check-label" for="includeAllUsers">
+                                        Include all users (not just selected ones)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bulk-export-section">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">👤 Export Individual User Reports</h5>
+                                <p class="mb-0">Generate separate PDF reports for each selected user showing their detailed print activity.</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button id="exportAllUsers" class="btn bulk-export-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-1" viewBox="0 0 16 16">
+                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                                    </svg>
+                                    Export All Selected Users
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-section fade-in">
+                    <h3 class="mb-4">📅 Filter Data</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="date-filter-container">
+                                <div class="date-filter-item">
+                                    <label class="form-label">From Date</label>
+                                    <input type="text" class="form-control flatpickr-input" id="fromDate" placeholder="Select start date">
+                                </div>
+                                <div class="date-filter-item">
+                                    <label class="form-label">To Date</label>
+                                    <input type="text" class="form-control flatpickr-input" id="toDate" placeholder="Select end date">
+                                </div>
+                                <div class="date-filter-item d-flex align-items-end">
+                                    <button class="btn filter-btn w-100" id="applyDateFilter">
+                                        Apply Date Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Filter by Users</label>
+                            <div class="user-selector" id="userSelector">
+                                <!-- User checkboxes will be populated here -->
+                            </div>
+                            <div class="mt-2 d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary" id="selectAllUsers">Select All</button>
+                                <button class="btn btn-sm btn-outline-secondary" id="deselectAllUsers">Deselect All</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="section-title">📈 Data Summary</h2>
+
+                <div class="row mb-5">
+                    <div class="col-md-4 mb-3">
+                        <div class="card p-3 card-total h-100">
+                            <div class="card-body text-center stats-card">
+                                <h5 class="card-title">Total Print Volume</h5>
+                                <p class="stats-number" id="totalPrintouts">0</p>
+                                <div class="stats-label">Pages × Sets</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card p-3 card-top-user h-100">
+                            <div class="card-body text-center stats-card">
+                                <h5 class="card-title">Top User by Print Volume</h5>
+                                <p class="stats-number" id="topUser">N/A</p>
+                                <div class="stats-label">Highest print volume</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card p-3 card-date h-100">
+                            <div class="card-body text-center stats-card">
+                                <h5 class="card-title">Date Range</h5>
+                                <p class="stats-number" id="dateRange">N/A</p>
+                                <div class="stats-label">Selected period</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">📊 Data Visualization</h2>
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card p-4 h-100">
+                            <h5 class="card-title text-center text-primary">Print Volume by User</h5>
+                            <div class="chart-container">
+                                <canvas id="userPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-4">
+                        <div class="card p-4 h-100">
+                            <h5 class="card-title text-center text-primary">Print Volume by Department</h5>
+                            <div class="chart-container">
+                                <canvas id="deptBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="section-title">📅 Daily Print Volume by User</h2>
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card p-4">
+                            <h5 class="card-title text-center text-info">Daily Print Volume by User</h5>
+                            <div class="chart-container">
+                                <canvas id="dailyUserBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">🏆 Top 10 Documents by Print Volume</h2>
+                
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card p-4 h-100">
+                            <h5 class="card-title text-center text-success">Top 10 Documents (Page Count)</h5>
+                            <div class="chart-container">
+                                <canvas id="topDocsBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 mb-4">
+                        <div class="card p-4 h-100">
+                            <h5 class="card-title text-center text-success">Detailed Summary</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mt-3">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Document Name</th>
+                                            <th>Total Pages (Pages × Sets)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topDocsTableBody">
+                                        <!-- Table content will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allData = [];
+        let filteredData = [];
+        let userPieChartInstance = null;
+        let deptBarChartInstance = null;
+        let topDocsBarChartInstance = null;
+        let dailyUserBarChartInstance = null;
+        let userPrintCounts = {};
+        let dailyUserPrintCounts = {};
+        let userDocumentStats = {};
+        let userDepartmentStats = {};
+        let allUserDocumentDetails = {}; // Stores detailed user-document data
+        
+        // Initialize date pickers
+        const fromDatePicker = flatpickr("#fromDate", {
+            dateFormat: "Y-m-d",
+            maxDate: "today"
+        });
+        
+        const toDatePicker = flatpickr("#toDate", {
+            dateFormat: "Y-m-d",
+            maxDate: "today"
+        });
+        
+        // Event listeners
+        document.getElementById('csvFile').addEventListener('change', handleFileSelect);
+        document.getElementById('applyDateFilter').addEventListener('click', applyDateFilter);
+        document.getElementById('selectAllUsers').addEventListener('click', selectAllUsers);
+        document.getElementById('deselectAllUsers').addEventListener('click', deselectAllUsers);
+        document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+        document.getElementById('exportAllUsers').addEventListener('click', exportAllUserReports);
+        document.getElementById('exportMasterReport').addEventListener('click', exportMasterUserDocumentReport);
+        
+        // Handle CSV file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true, 
+                    skipEmptyLines: true,
+                    dynamicTyping: true,
+                    complete: function(results) {
+                        if (results.errors.length > 0) {
+                            alert('Error reading data: ' + results.errors[0].message);
+                            return;
+                        }
+                        allData = results.data;
+                        filteredData = [...allData];
+                        processData(filteredData);
+                        document.getElementById('dashboardContent').style.display = 'block';
+                        
+                        // Set default date range to cover all data
+                        setDefaultDateRange();
+                    }
+                });
+            }
+        }
+        
+        // Set default date range based on data
+        function setDefaultDateRange() {
+            if (allData.length === 0) return;
+            
+            const dates = allData
+                .map(row => new Date(row['Date Time']))
+                .filter(date => !isNaN(date));
+                
+            if (dates.length === 0) return;
+            
+            dates.sort((a, b) => a - b);
+            const minDate = dates[0];
+            const maxDate = dates[dates.length - 1];
+            
+            fromDatePicker.setDate(minDate);
+            toDatePicker.setDate(maxDate);
+        }
+        
+        // Apply date filter
+        function applyDateFilter() {
+            const fromDate = fromDatePicker.selectedDates[0];
+            const toDate = toDatePicker.selectedDates[0];
+            
+            if (!fromDate || !toDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            // Adjust toDate to include the entire day
+            const adjustedToDate = new Date(toDate);
+            adjustedToDate.setHours(23, 59, 59, 999);
+            
+            filteredData = allData.filter(row => {
+                const rowDate = new Date(row['Date Time']);
+                return rowDate >= fromDate && rowDate <= adjustedToDate;
+            });
+            
+            // Apply user filter if any users are selected
+            const selectedUsers = getSelectedUsers();
+            if (selectedUsers.length > 0) {
+                filteredData = filteredData.filter(row => {
+                    const userName = row['User Name'] || 'Unknown User';
+                    return selectedUsers.includes(userName);
+                });
+            }
+            
+            processData(filteredData);
+        }
+        
+        // Get selected users from checkboxes
+        function getSelectedUsers() {
+            const checkboxes = document.querySelectorAll('#userSelector input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(checkbox => checkbox.value);
+        }
+        
+        // Get all users (not just selected)
+        function getAllUsers() {
+            const checkboxes = document.querySelectorAll('#userSelector input[type="checkbox"]');
+            return Array.from(checkboxes).map(checkbox => checkbox.value);
+        }
+        
+        // Select all users
+        function selectAllUsers() {
+            const checkboxes = document.querySelectorAll('#userSelector input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+            applyDateFilter();
+        }
+        
+        // Deselect all users
+        function deselectAllUsers() {
+            const checkboxes = document.querySelectorAll('#userSelector input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+            applyDateFilter();
+        }
+        
+        // Analyze data and create visualizations
+        function processData(data) {
+            const pagesColumn = 'Pages';
+            const setsColumn = 'Sets';
+            const userColumn = 'User Name';
+            const dateColumn = 'Date Time';
+            const deptColumn = 'Department Number';
+            const docColumn = 'Document Name';
+
+            let totalPrints = 0;
+            userPrintCounts = {};
+            const deptPrintCounts = {};
+            const docPrintCounts = {};
+            dailyUserPrintCounts = {};
+            userDocumentStats = {};
+            userDepartmentStats = {};
+            allUserDocumentDetails = {};
+            let dates = [];
+            const allUsers = new Set();
+
+            // Calculate data metrics
+            data.forEach(row => {
+                const pages = parseInt(row[pagesColumn]) || 0; 
+                const sets = parseInt(row[setsColumn]) || 1;
+                const effectivePages = pages * sets;
+
+                if (effectivePages > 0) {
+                    const userName = row[userColumn] || 'Unknown User';
+                    const department = row[deptColumn] || 'Unknown Dept';
+                    const documentName = row[docColumn] || 'Untitled Document';
+                    const dateTime = new Date(row[dateColumn]); 
+                    const dateKey = dateTime.toISOString().split('T')[0]; // YYYY-MM-DD
+
+                    totalPrints += effectivePages;
+                    if (!isNaN(dateTime)) {
+                        dates.push(dateTime);
+                    }
+
+                    // Track all users
+                    allUsers.add(userName);
+
+                    // User calculations
+                    userPrintCounts[userName] = (userPrintCounts[userName] || 0) + effectivePages;
+
+                    // Department calculations
+                    deptPrintCounts[department] = (deptPrintCounts[department] || 0) + effectivePages;
+                    
+                    // Document calculations
+                    docPrintCounts[documentName] = (docPrintCounts[documentName] || 0) + effectivePages;
+                    
+                    // Daily user calculations
+                    if (!dailyUserPrintCounts[dateKey]) {
+                        dailyUserPrintCounts[dateKey] = {};
+                    }
+                    dailyUserPrintCounts[dateKey][userName] = (dailyUserPrintCounts[dateKey][userName] || 0) + effectivePages;
+                    
+                    // User-specific document statistics
+                    if (!userDocumentStats[userName]) {
+                        userDocumentStats[userName] = {};
+                    }
+                    userDocumentStats[userName][documentName] = (userDocumentStats[userName][documentName] || 0) + effectivePages;
+                    
+                    // User-specific department statistics
+                    if (!userDepartmentStats[userName]) {
+                        userDepartmentStats[userName] = {};
+                    }
+                    userDepartmentStats[userName][department] = (userDepartmentStats[userName][department] || 0) + effectivePages;
+                    
+                    // Detailed user-document data for master report
+                    if (!allUserDocumentDetails[userName]) {
+                        allUserDocumentDetails[userName] = {};
+                    }
+                    if (!allUserDocumentDetails[userName][documentName]) {
+                        allUserDocumentDetails[userName][documentName] = 0;
+                    }
+                    allUserDocumentDetails[userName][documentName] += effectivePages;
+                }
+            });
+
+            // Update summary cards
+            document.getElementById('totalPrintouts').textContent = totalPrints.toLocaleString();
+
+            let topUser = { name: 'N/A', pages: 0 };
+            for (const [user, pages] of Object.entries(userPrintCounts)) {
+                if (pages > topUser.pages) {
+                    topUser = { name: user, pages: pages };
+                }
+            }
+            document.getElementById('topUser').innerHTML = topUser.pages > 0 ? 
+                `<strong>${topUser.name}</strong><br>${topUser.pages.toLocaleString()} pages` : 'N/A';
+
+            dates.sort((a, b) => a - b);
+            const minDate = dates.length > 0 ? dates[0].toLocaleDateString('en-US') : 'N/A';
+            const maxDate = dates.length > 0 ? dates[dates.length - 1].toLocaleDateString('en-US') : 'N/A';
+            document.getElementById('dateRange').textContent = `${minDate} - ${maxDate}`;
+            
+            // Update user selector with export buttons
+            updateUserSelector(Array.from(allUsers), userPrintCounts);
+            
+            // Create charts
+            createPieChart(userPrintCounts);
+            createBarChart(deptPrintCounts);
+            createDailyUserBarChart(dailyUserPrintCounts);
+            
+            // Process Top 10 Documents
+            const top10Docs = getTop10(docPrintCounts);
+            displayTop10Documents(top10Docs);
+            createTopDocsBarChart(top10Docs);
+        }
+        
+        // Update user selector with checkboxes and export buttons
+        function updateUserSelector(users, counts) {
+            const userSelector = document.getElementById('userSelector');
+            userSelector.innerHTML = '';
+            
+            if (users.length === 0) {
+                userSelector.innerHTML = '<div class="text-muted">No users found</div>';
+                return;
+            }
+            
+            users.sort().forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                const userPrintCount = counts[user] || 0;
+                
+                userItem.innerHTML = `
+                    <div class="user-info">
+                        <input type="checkbox" class="user-checkbox" id="user-${user}" value="${user}" checked>
+                        <label for="user-${user}">${user}</label>
+                        <span class="user-print-count">${userPrintCount.toLocaleString()} pages</span>
+                    </div>
+                    <div class="user-actions">
+                        <button class="user-btn user-btn-export" data-user="${user}" title="Export individual report for ${user}">
+                            Export
+                        </button>
+                    </div>
+                `;
+                userSelector.appendChild(userItem);
+            });
+            
+            // Add event listeners to checkboxes
+            const checkboxes = document.querySelectorAll('#userSelector input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', applyDateFilter);
+            });
+            
+            // Add event listeners to export buttons
+            const exportButtons = document.querySelectorAll('.user-btn-export');
+            exportButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const userName = this.getAttribute('data-user');
+                    exportSingleUserReport(userName);
+                });
+            });
+        }
+
+        // Sort object by values and get Top 10
+        function getTop10(dataObject) {
+            return Object.entries(dataObject)
+                .sort(([, countA], [, countB]) => countB - countA) 
+                .slice(0, 10) 
+                .map(([name, pages]) => ({ name, pages })); 
+        }
+        
+        // Get top documents for a specific user
+        function getTopDocumentsForUser(userName, limit = 10) {
+            if (!userDocumentStats[userName]) return [];
+            return getTop10(userDocumentStats[userName]);
+        }
+        
+        // Get top departments for a specific user
+        function getTopDepartmentsForUser(userName, limit = 10) {
+            if (!userDepartmentStats[userName]) return [];
+            return getTop10(userDepartmentStats[userName]);
+        }
+        
+        // Get daily print volume for a specific user
+        function getDailyPrintVolumeForUser(userName) {
+            const dailyData = {};
+            for (const [date, users] of Object.entries(dailyUserPrintCounts)) {
+                if (users[userName]) {
+                    dailyData[date] = users[userName];
+                }
+            }
+            return dailyData;
+        }
+        
+        // Get all user-document data for master report
+        function getAllUserDocumentData(includeAllUsers = true) {
+            const usersToInclude = includeAllUsers ? Object.keys(allUserDocumentDetails) : getSelectedUsers();
+            const result = [];
+            
+            usersToInclude.forEach(userName => {
+                if (allUserDocumentDetails[userName]) {
+                    const userDocs = allUserDocumentDetails[userName];
+                    const userTotal = Object.values(userDocs).reduce((sum, pages) => sum + pages, 0);
+                    
+                    // Sort documents by page count
+                    const sortedDocs = Object.entries(userDocs)
+                        .sort(([, pagesA], [, pagesB]) => pagesB - pagesA)
+                        .map(([docName, pages]) => ({ docName, pages }));
+                    
+                    result.push({
+                        userName,
+                        userTotal,
+                        documents: sortedDocs
+                    });
+                }
+            });
+            
+            // Sort users by total pages
+            return result.sort((a, b) => b.userTotal - a.userTotal);
+        }
+        
+        // Populate Top 10 Documents table
+        function displayTop10Documents(topDocsArray) {
+            const tableBody = document.getElementById('topDocsTableBody');
+            tableBody.innerHTML = ''; 
+            
+            if (topDocsArray.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No data available.</td></tr>';
+                return;
+            }
+
+            topDocsArray.forEach((doc, index) => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${doc.name}</td>
+                    <td>${doc.pages.toLocaleString()}</td>
+                `;
+            });
+        }
+
+        // Create Top 10 Documents Bar Chart
+        function createTopDocsBarChart(topDocsArray) {
+            const ctx = document.getElementById('topDocsBarChart').getContext('2d');
+            const labels = topDocsArray.map(doc => doc.name);
+            const counts = topDocsArray.map(doc => doc.pages);
+            
+            if (topDocsBarChartInstance) {
+                topDocsBarChartInstance.destroy();
+            }
+
+            topDocsBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Pages (Pages × Sets)',
+                        data: counts,
+                        backgroundColor: '#6f42c1', 
+                        borderColor: '#6f42c1',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Top 10 Documents by Print Volume' },
+                        tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.formattedValue} pages` } }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Total Pages (Pages × Sets)' } 
+                        },
+                        y: { 
+                            title: { display: true, text: 'Document Name' } 
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create Pie Chart for User Distribution
+        function createPieChart(data) {
+            const ctx = document.getElementById('userPieChart').getContext('2d');
+            if (userPieChartInstance) { userPieChartInstance.destroy(); }
+            const labels = Object.keys(data);
+            const counts = Object.values(data);
+            const backgroundColors = labels.map(() => `hsl(${Math.random() * 360}, 70%, 50%)`);
+
+            userPieChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{ 
+                        label: 'Print Volume (Pages × Sets)', 
+                        data: counts, 
+                        backgroundColor: backgroundColors, 
+                        hoverOffset: 8 
+                    }]
+                },
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'right' }, 
+                        tooltip: { 
+                            callbacks: { 
+                                label: (context) => `${context.label}: ${context.formattedValue} pages` 
+                            } 
+                        } 
+                    }
+                }
+            });
+        }
+
+        // Create Bar Chart for Department Distribution
+        function createBarChart(data) {
+            const ctx = document.getElementById('deptBarChart').getContext('2d');
+            if (deptBarChartInstance) { deptBarChartInstance.destroy(); }
+            const labels = Object.keys(data);
+            const counts = Object.values(data);
+
+            deptBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ 
+                        label: 'Total Pages (Pages × Sets)', 
+                        data: counts, 
+                        backgroundColor: '#198754', 
+                        borderColor: '#198754', 
+                        borderWidth: 1 
+                    }]
+                },
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Total Pages (Pages × Sets)' } 
+                        } 
+                    }
+                }
+            });
+        }
+        
+        // Create Daily User Bar Chart
+        function createDailyUserBarChart(dailyData) {
+            const ctx = document.getElementById('dailyUserBarChart').getContext('2d');
+            if (dailyUserBarChartInstance) { 
+                dailyUserBarChartInstance.destroy(); 
+            }
+            
+            // Get all dates and sort them
+            const dates = Object.keys(dailyData).sort();
+            
+            // Get all users across all dates
+            const allUsers = new Set();
+            dates.forEach(date => {
+                Object.keys(dailyData[date]).forEach(user => {
+                    allUsers.add(user);
+                });
+            });
+            
+            const users = Array.from(allUsers);
+            
+            // Create datasets for each user
+            const datasets = users.map((user, index) => {
+                const hue = (index * 137.5) % 360; // Golden angle for distinct colors
+                return {
+                    label: user,
+                    data: dates.map(date => dailyData[date][user] || 0),
+                    backgroundColor: `hsla(${hue}, 70%, 60%, 0.7)`,
+                    borderColor: `hsl(${hue}, 70%, 50%)`,
+                    borderWidth: 1
+                };
+            });
+            
+            dailyUserBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Total Pages (Pages × Sets)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Export Single User Report
+        async function exportSingleUserReport(userName) {
+            const overlay = document.getElementById('pdfLoadingOverlay');
+            const loadingMessage = document.getElementById('loadingMessage');
+            loadingMessage.textContent = `Generating report for ${userName}...`;
+            overlay.style.display = 'flex';
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // PDF settings
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                let yPos = margin;
+                
+                // Add title
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Individual User Print Report', pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+                
+                // Add user name
+                doc.setFontSize(16);
+                doc.text(`User: ${userName}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+                
+                // Add report date
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                const reportDate = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                doc.text(`Report generated: ${reportDate}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 15;
+                
+                // Add filter information
+                const fromDate = document.getElementById('fromDate').value || 'All dates';
+                const toDate = document.getElementById('toDate').value || 'All dates';
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Report Parameters', margin, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Date Range: ${fromDate} to ${toDate}`, margin, yPos);
+                yPos += 5;
+                
+                // Add user summary
+                const userTotal = userPrintCounts[userName] || 0;
+                doc.text(`Total Print Volume: ${userTotal.toLocaleString()} pages`, margin, yPos);
+                yPos += 10;
+                
+                // Function to check if we need a new page
+                const checkNewPage = (neededSpace) => {
+                    if (yPos + neededSpace > pageHeight - margin) {
+                        doc.addPage();
+                        yPos = margin;
+                        return true;
+                    }
+                    return false;
+                };
+                
+                // Get user's top documents
+                const topDocuments = getTopDocumentsForUser(userName);
+                if (topDocuments.length > 0) {
+                    checkNewPage(50);
+                    
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Top Documents Printed', margin, yPos);
+                    yPos += 10;
+                    
+                    // Create table headers
+                    doc.setFillColor(13, 110, 253);
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    
+                    doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+                    doc.text('#', margin + 5, yPos + 5);
+                    doc.text('Document Name', margin + 15, yPos + 5);
+                    doc.text('Pages Printed', pageWidth - margin - 25, yPos + 5, { align: 'right' });
+                    
+                    yPos += 8;
+                    
+                    // Add document rows
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    topDocuments.forEach((docItem, index) => {
+                        if (yPos > pageHeight - margin - 10) {
+                            doc.addPage();
+                            yPos = margin;
+                        }
+                        
+                        // Alternate row colors
+                        if (index % 2 === 0) {
+                            doc.setFillColor(240, 240, 240);
+                            doc.rect(margin, yPos, pageWidth - 2 * margin, 7, 'F');
+                        }
+                        
+                        doc.text((index + 1).toString(), margin + 5, yPos + 5);
+                        doc.text(docItem.name.substring(0, 50) + (docItem.name.length > 50 ? '...' : ''), 
+                                margin + 15, yPos + 5);
+                        doc.text(docItem.pages.toLocaleString(), pageWidth - margin - 5, yPos + 5, { align: 'right' });
+                        
+                        yPos += 7;
+                    });
+                    
+                    yPos += 10;
+                }
+                
+                // Get user's department breakdown
+                const topDepartments = getTopDepartmentsForUser(userName);
+                if (topDepartments.length > 0) {
+                    checkNewPage(50);
+                    
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Print Volume by Department', margin, yPos);
+                    yPos += 10;
+                    
+                    // Create table headers
+                    doc.setFillColor(40, 167, 69); // Green for departments
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    
+                    doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+                    doc.text('#', margin + 5, yPos + 5);
+                    doc.text('Department', margin + 15, yPos + 5);
+                    doc.text('Pages Printed', pageWidth - margin - 25, yPos + 5, { align: 'right' });
+                    
+                    yPos += 8;
+                    
+                    // Add department rows
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    topDepartments.forEach((dept, index) => {
+                        if (yPos > pageHeight - margin - 10) {
+                            doc.addPage();
+                            yPos = margin;
+                        }
+                        
+                        // Alternate row colors
+                        if (index % 2 === 1) {
+                            doc.setFillColor(240, 240, 240);
+                            doc.rect(margin, yPos, pageWidth - 2 * margin, 7, 'F');
+                        }
+                        
+                        doc.text((index + 1).toString(), margin + 5, yPos + 5);
+                        doc.text(dept.name, margin + 15, yPos + 5);
+                        doc.text(dept.pages.toLocaleString(), pageWidth - margin - 5, yPos + 5, { align: 'right' });
+                        
+                        yPos += 7;
+                    });
+                    
+                    yPos += 10;
+                }
+                
+                // Get daily print volume for the user
+                const dailyData = getDailyPrintVolumeForUser(userName);
+                const dailyDates = Object.keys(dailyData).sort();
+                
+                if (dailyDates.length > 0) {
+                    checkNewPage(50);
+                    
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Daily Print Volume', margin, yPos);
+                    yPos += 10;
+                    
+                    // Create table headers
+                    doc.setFillColor(111, 66, 193); // Purple for daily data
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    
+                    doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+                    doc.text('#', margin + 5, yPos + 5);
+                    doc.text('Date', margin + 15, yPos + 5);
+                    doc.text('Pages Printed', pageWidth - margin - 25, yPos + 5, { align: 'right' });
+                    
+                    yPos += 8;
+                    
+                    // Add daily rows
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    dailyDates.forEach((date, index) => {
+                        if (yPos > pageHeight - margin - 10) {
+                            doc.addPage();
+                            yPos = margin;
+                        }
+                        
+                        // Alternate row colors
+                        if (index % 2 === 0) {
+                            doc.setFillColor(240, 240, 240);
+                            doc.rect(margin, yPos, pageWidth - 2 * margin, 7, 'F');
+                        }
+                        
+                        doc.text((index + 1).toString(), margin + 5, yPos + 5);
+                        doc.text(date, margin + 15, yPos + 5);
+                        doc.text(dailyData[date].toLocaleString(), pageWidth - margin - 5, yPos + 5, { align: 'right' });
+                        
+                        yPos += 7;
+                    });
+                }
+                
+                // Add page numbers
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                    doc.text(`User: ${userName}`, margin, pageHeight - 10);
+                }
+                
+                // Save PDF
+                const safeUserName = userName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const fileName = `User_Report_${safeUserName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+                doc.save(fileName);
+                
+            } catch (error) {
+                console.error('Error generating user report:', error);
+                alert('Error generating report for ' + userName + ': ' + error.message);
+            } finally {
+                // Hide loading overlay
+                overlay.style.display = 'none';
+            }
+        }
+        
+        // Export reports for all selected users
+        async function exportAllUserReports() {
+            const selectedUsers = getSelectedUsers();
+            
+            if (selectedUsers.length === 0) {
+                alert('Please select at least one user to export reports for.');
+                return;
+            }
+            
+            if (selectedUsers.length > 10) {
+                const confirmExport = confirm(`You are about to generate ${selectedUsers.length} individual PDF reports. This may take a while. Continue?`);
+                if (!confirmExport) return;
+            }
+            
+            const overlay = document.getElementById('pdfLoadingOverlay');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            loadingMessage.textContent = `Generating ${selectedUsers.length} user reports...`;
+            progressContainer.style.display = 'block';
+            overlay.style.display = 'flex';
+            
+            let completed = 0;
+            
+            // Update progress
+            const updateProgress = () => {
+                const percent = Math.round((completed / selectedUsers.length) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${completed}/${selectedUsers.length} users processed`;
+            };
+            
+            updateProgress();
+            
+            // Generate reports sequentially to avoid overwhelming the browser
+            for (const user of selectedUsers) {
+                try {
+                    loadingMessage.textContent = `Generating report for ${user}...`;
+                    await exportSingleUserReport(user);
+                    completed++;
+                    updateProgress();
+                } catch (error) {
+                    console.error(`Error generating report for ${user}:`, error);
+                    completed++;
+                    updateProgress();
+                }
+            }
+            
+            // Hide loading overlay
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+                
+                alert(`Successfully generated ${completed} out of ${selectedUsers.length} user reports.`);
+            }, 500);
+        }
+        
+        // Export Master User-Document Report (All users in one PDF)
+        async function exportMasterUserDocumentReport() {
+            const overlay = document.getElementById('pdfLoadingOverlay');
+            const loadingMessage = document.getElementById('loadingMessage');
+            loadingMessage.textContent = 'Generating Master User-Document Report...';
+            overlay.style.display = 'flex';
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // PDF settings
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                let yPos = margin;
+                
+                // Get whether to include all users or just selected ones
+                const includeAllUsers = document.getElementById('includeAllUsers').checked;
+                
+                // Add title
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Master User-Document Print Report', pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+                
+                // Add subtitle
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                const userScope = includeAllUsers ? 'All Users' : 'Selected Users Only';
+                doc.text(`Scope: ${userScope}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+                
+                // Add report date
+                doc.setFontSize(10);
+                const reportDate = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                doc.text(`Report generated: ${reportDate}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 15;
+                
+                // Add date range information
+                const fromDate = document.getElementById('fromDate').value || 'All dates';
+                const toDate = document.getElementById('toDate').value || 'All dates';
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Report Parameters', margin, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Date Range: ${fromDate} to ${toDate}`, margin, yPos);
+                yPos += 5;
+                doc.text(`User Scope: ${userScope}`, margin, yPos);
+                yPos += 10;
+                
+                // Get all user-document data
+                const userDocumentData = getAllUserDocumentData(includeAllUsers);
+                
+                if (userDocumentData.length === 0) {
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('No data available for the selected criteria.', margin, yPos);
+                } else {
+                    // Summary statistics
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Summary Statistics', margin, yPos);
+                    yPos += 8;
+                    
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    const totalUsers = userDocumentData.length;
+                    const totalPages = userDocumentData.reduce((sum, user) => sum + user.userTotal, 0);
+                    const avgPagesPerUser = totalUsers > 0 ? Math.round(totalPages / totalUsers) : 0;
+                    
+                    doc.text(`Total Users: ${totalUsers}`, margin, yPos);
+                    yPos += 5;
+                    doc.text(`Total Pages Printed: ${totalPages.toLocaleString()}`, margin, yPos);
+                    yPos += 5;
+                    doc.text(`Average Pages per User: ${avgPagesPerUser.toLocaleString()}`, margin, yPos);
+                    yPos += 10;
+                    
+                    // Function to check if we need a new page
+                    const checkNewPage = (neededSpace) => {
+                        if (yPos + neededSpace > pageHeight - margin) {
+                            doc.addPage();
+                            yPos = margin;
+                            return true;
+                        }
+                        return false;
+                    };
+                    
+                    // Process each user
+                    for (let userIndex = 0; userIndex < userDocumentData.length; userIndex++) {
+                        const userData = userDocumentData[userIndex];
+                        
+                        // Check if we need a new page before adding user section
+                        checkNewPage(50); // Reserve space for user section
+                        
+                        // User header
+                        doc.setFontSize(14);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`User ${userIndex + 1}: ${userData.userName}`, margin, yPos);
+                        yPos += 8;
+                        
+                        // User summary
+                        doc.setFontSize(10);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(`Total Pages Printed: ${userData.userTotal.toLocaleString()}`, margin, yPos);
+                        yPos += 5;
+                        doc.text(`Number of Documents: ${userData.documents.length}`, margin, yPos);
+                        yPos += 10;
+                        
+                        // Check if we need a new page before adding table
+                        checkNewPage(30 + (userData.documents.length * 7));
+                        
+                        // Create table headers for documents
+                        doc.setFillColor(13, 110, 253);
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(10);
+                        doc.setFont('helvetica', 'bold');
+                        
+                        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+                        doc.text('#', margin + 5, yPos + 5);
+                        doc.text('Document Name', margin + 20, yPos + 5);
+                        doc.text('Pages Printed', pageWidth - margin - 25, yPos + 5, { align: 'right' });
+                        
+                        yPos += 8;
+                        
+                        // Add document rows
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFont('helvetica', 'normal');
+                        
+                        userData.documents.forEach((docItem, docIndex) => {
+                            if (yPos > pageHeight - margin - 10) {
+                                doc.addPage();
+                                yPos = margin;
+                                
+                                // Re-add table headers on new page
+                                doc.setFillColor(13, 110, 253);
+                                doc.setTextColor(255, 255, 255);
+                                doc.setFontSize(10);
+                                doc.setFont('helvetica', 'bold');
+                                
+                                doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+                                doc.text('#', margin + 5, yPos + 5);
+                                doc.text('Document Name', margin + 20, yPos + 5);
+                                doc.text('Pages Printed', pageWidth - margin - 25, yPos + 5, { align: 'right' });
+                                
+                                yPos += 8;
+                                doc.setTextColor(0, 0, 0);
+                                doc.setFont('helvetica', 'normal');
+                            }
+                            
+                            // Alternate row colors
+                            if (docIndex % 2 === 0) {
+                                doc.setFillColor(240, 240, 240);
+                                doc.rect(margin, yPos, pageWidth - 2 * margin, 7, 'F');
+                            }
+                            
+                            doc.text((docIndex + 1).toString(), margin + 5, yPos + 5);
+                            
+                            // Truncate document name if too long
+                            const docName = docItem.docName.length > 60 
+                                ? docItem.docName.substring(0, 57) + '...' 
+                                : docItem.docName;
+                            doc.text(docName, margin + 20, yPos + 5);
+                            doc.text(docItem.pages.toLocaleString(), pageWidth - margin - 5, yPos + 5, { align: 'right' });
+                            
+                            yPos += 7;
+                        });
+                        
+                        yPos += 15;
+                        
+                        // Add a separator between users (except after last user)
+                        if (userIndex < userDocumentData.length - 1) {
+                            if (yPos > pageHeight - margin - 20) {
+                                doc.addPage();
+                                yPos = margin;
+                            } else {
+                                doc.setDrawColor(200, 200, 200);
+                                doc.line(margin, yPos, pageWidth - margin, yPos);
+                                yPos += 10;
+                            }
+                        }
+                    }
+                }
+                
+                // Add page numbers
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                    doc.text('Master User-Document Report', pageWidth - margin, pageHeight - 10, { align: 'right' });
+                }
+                
+                // Save PDF
+                const fileName = `Master_User_Document_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+                doc.save(fileName);
+                
+            } catch (error) {
+                console.error('Error generating master report:', error);
+                alert('Error generating master report: ' + error.message);
+            } finally {
+                // Hide loading overlay
+                overlay.style.display = 'none';
+            }
+        }
+        
+        // Export Dashboard to PDF - Simplified version
+        async function exportToPDF() {
+            // Show loading overlay
+            const overlay = document.getElementById('pdfLoadingOverlay');
+            overlay.style.display = 'flex';
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // PDF settings
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                let yPos = margin;
+                
+                // Get export options
+                const includeCharts = document.getElementById('includeCharts').checked;
+                const includeTables = document.getElementById('includeTables').checked;
+                const includeSummary = document.getElementById('includeSummary').checked;
+                
+                // Add title
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('CTM Print Volume Analysis Report', pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+                
+                // Add report date
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                const reportDate = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                doc.text(`Report generated: ${reportDate}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 15;
+                
+                // Add summary statistics if selected
+                if (includeSummary) {
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Summary Statistics', margin, yPos);
+                    yPos += 8;
+                    
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    // Get summary values
+                    const totalPrintouts = document.getElementById('totalPrintouts').textContent;
+                    const topUserElement = document.getElementById('topUser');
+                    const topUserText = topUserElement.textContent || topUserElement.innerText;
+                    const dateRange = document.getElementById('dateRange').textContent;
+                    
+                    // Get filter information
+                    const fromDate = document.getElementById('fromDate').value || 'All dates';
+                    const toDate = document.getElementById('toDate').value || 'All dates';
+                    const selectedUsers = getSelectedUsers();
+                    const userText = selectedUsers.length > 0 ? 
+                        `${selectedUsers.length} user(s) selected` : 
+                        'All users';
+                    
+                    doc.text(`Total Print Volume: ${totalPrintouts} pages`, margin, yPos);
+                    yPos += 5;
+                    doc.text(`Top User: ${topUserText}`, margin, yPos);
+                    yPos += 5;
+                    doc.text(`Date Range: ${dateRange}`, margin, yPos);
+                    yPos += 5;
+                    doc.text(`Data Filter: ${fromDate} to ${toDate} (${userText})`, margin, yPos);
+                    yPos += 10;
+                }
+                
+                // Function to check if we need a new page
+                const checkNewPage = (neededSpace) => {
+                    if (yPos + neededSpace > pageHeight - margin) {
+                        doc.addPage();
+                        yPos = margin;
+                        return true;
+                    }
+                    return false;
+                };
+                
+                // Export charts if selected
+                if (includeCharts) {
+                    const chartElements = [
+                        { id: 'userPieChart', title: 'Print Volume by User' },
+                        { id: 'deptBarChart', title: 'Print Volume by Department' },
+                        { id: 'dailyUserBarChart', title: 'Daily Print Volume by User' },
+                        { id: 'topDocsBarChart', title: 'Top 10 Documents by Print Volume' }
+                    ];
+                    
+                    for (const chart of chartElements) {
+                        try {
+                            const chartElement = document.getElementById(chart.id);
+                            if (chartElement && chartElement.offsetWidth > 0) {
+                                checkNewPage(70); // Reserve space for chart
+                                
+                                // Add chart title
+                                doc.setFontSize(12);
+                                doc.setFont('helvetica', 'bold');
+                                doc.text(chart.title, margin, yPos);
+                                yPos += 7;
+                                
+                                // Convert chart to image
+                                const chartCanvas = await html2canvas(chartElement, {
+                                    scale: 2,
+                                    useCORS: true,
+                                    logging: false
+                                });
+                                const chartImgData = chartCanvas.toDataURL('image/jpeg', 0.8);
+                                
+                                // Add chart image to PDF
+                                const chartWidth = pageWidth - 2 * margin;
+                                const chartHeight = (chartCanvas.height * chartWidth) / chartCanvas.width;
+                                
+                                doc.addImage(chartImgData, 'JPEG', margin, yPos, chartWidth, Math.min(chartHeight, 60));
+                                yPos += Math.min(chartHeight, 60) + 10;
+                            }
+                        } catch (chartError) {
+                            console.warn(`Error capturing chart ${chart.id}:`, chartError);
+                            // Continue with next chart
+                        }
+                    }
+                }
+                
+                // Export top documents table if selected
+                if (includeTables) {
+                    checkNewPage(50);
+                    
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Top 10 Documents by Print Volume', margin, yPos);
+                    yPos += 10;
+                    
+                    // Get table data
+                    const tableRows = [];
+                    const tableBody = document.getElementById('topDocsTableBody');
+                    const rows = tableBody.querySelectorAll('tr');
+                    
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length >= 3) {
+                            tableRows.push([
+                                cells[0].textContent,
+                                cells[1].textContent.substring(0, 50) + (cells[1].textContent.length > 50 ? '...' : ''),
+                                cells[2].textContent
+                            ]);
+                        }
+                    });
+                    
+                    // Create simple table manually
+                    if (tableRows.length > 0) {
+                        // Table headers
+                        doc.setFillColor(13, 110, 253);
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(10);
+                        doc.setFont('helvetica', 'bold');
+                        
+                        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+                        doc.text('#', margin + 5, yPos + 5);
+                        doc.text('Document Name', margin + 15, yPos + 5);
+                        doc.text('Total Pages', pageWidth - margin - 25, yPos + 5, { align: 'right' });
+                        
+                        yPos += 8;
+                        
+                        // Table rows
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFont('helvetica', 'normal');
+                        
+                        tableRows.forEach((row, index) => {
+                            if (yPos > pageHeight - margin - 10) {
+                                doc.addPage();
+                                yPos = margin;
+                            }
+                            
+                            // Alternate row colors
+                            if (index % 2 === 0) {
+                                doc.setFillColor(240, 240, 240);
+                                doc.rect(margin, yPos, pageWidth - 2 * margin, 7, 'F');
+                            }
+                            
+                            doc.text(row[0], margin + 5, yPos + 5);
+                            doc.text(row[1], margin + 15, yPos + 5);
+                            doc.text(row[2], pageWidth - margin - 5, yPos + 5, { align: 'right' });
+                            
+                            yPos += 7;
+                        });
+                        
+                        yPos += 5;
+                    }
+                }
+                
+                // Add page numbers
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                    doc.text('CTM Print Analysis Dashboard', pageWidth - margin, pageHeight - 10, { align: 'right' });
+                }
+                
+                // Save PDF
+                const fileName = `CTM_Print_Analysis_${new Date().toISOString().slice(0, 10)}.pdf`;
+                doc.save(fileName);
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF: ' + error.message);
+            } finally {
+                // Hide loading overlay
+                overlay.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

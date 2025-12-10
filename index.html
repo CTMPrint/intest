@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Animated Navigation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 1rem;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .navigation-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .nav-button {
+            position: relative;
+            width: 220px;
+            height: 280px;
+            perspective: 1000px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            transform: translateY(-10px);
+        }
+        
+        .button-inner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+        
+        .nav-button:hover .button-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .button-front, .button-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+        
+        .button-front {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .button-back {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            transform: rotateY(180deg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.4s ease;
+        }
+        
+        .nav-button:hover .icon {
+            transform: scale(1.2);
+        }
+        
+        .button-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .button-desc {
+            font-size: 1rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+        }
+        
+        .button-back .button-desc {
+            margin-bottom: 1.5rem;
+        }
+        
+        .explore-btn {
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.4);
+        }
+        
+        .explore-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 126, 95, 0.6);
+        }
+        
+        /* Button-specific colors */
+        .home .icon { color: #ff7e5f; }
+        .home .explore-btn { background: linear-gradient(90deg, #ff7e5f, #feb47b); }
+        
+        .printer-report .icon { color: #6a89cc; }
+        .printer-report .explore-btn { background: linear-gradient(90deg, #6a89cc, #4a69bd); }
+        
+        .loading-system .icon { color: #78e08f; }
+        .loading-system .explore-btn { background: linear-gradient(90deg, #78e08f, #38ada9); }
+        
+        .contact .icon { color: #e55039; }
+        .contact .explore-btn { background: linear-gradient(90deg, #e55039, #eb2f06); }
+        
+        /* Animated background elements */
+        .bg-element {
+            position: absolute;
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .element-1 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #ff7e5f, transparent);
+            top: 5%;
+            left: 5%;
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        .element-2 {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #6a89cc, transparent);
+            bottom: 10%;
+            right: 10%;
+            animation: float 12s infinite ease-in-out reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 992px) {
+            .navigation-container {
+                gap: 1.5rem;
+            }
+            
+            .nav-button {
+                width: 200px;
+                height: 260px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navigation-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-button {
+                width: 90%;
+                max-width: 350px;
+                height: 200px;
+            }
+            
+            .button-inner {
+                transition: transform 0.6s;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-element element-1"></div>
+    <div class="bg-element element-2"></div>
+    
+    <div class="container">
+        <header>
+            <h1>Ceylon Tea Marketing (Pvt) Ltd (CTM)</h1>
+            <p class="subtitle">A beta version of this is available as a web application for your convenience.</p>
+        </header>
+        
+        <div class="navigation-container">
+            <!-- Home Button -->
+            <div class="nav-button home">
+                <div class="button-inner">
+                    <div class="button-front">
+                        <i class="fas fa-home icon"></i>
+                        <div class="button-title">Home</div>
+                        <div class="button-desc">Return to the main dashboard</div>
+                    </div>
+                    <div class="button-back">
+                        <div class="button-title">Welcome Home</div>
+                        <div class="button-desc">One platform. Total productivity.</div>
+                        <button class="explore-btn">Explore Home</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Printer Report Button -->
+            <div class="nav-button printer-report" onclick="window.location.href='Printer.html'">
+                <div class="button-inner">
+                    <div class="button-front">
+                        <i class="fas fa-print icon"></i>
+                        <div class="button-title">Printer Report</div>
+                        <div class="button-desc">View printing statistics</div>
+                    </div>
+                    <div class="button-back">
+                        <div class="button-title">Printer Reports</div>
+                        <div class="button-desc">User Printing Analytics and Job Tracking.</div>
+                        <button class="explore-btn">View Reports</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading System Button -->
+            <div class="nav-button loading-system" onclick="window.location.href='container.html'">
+                <div class="button-inner">
+                    <div class="button-front">
+                        <i class="fas fa-truck-loading icon"></i>
+                        <div class="button-title">Loading System</div>
+                        <div class="button-desc">Monitor loading operations</div>
+                    </div>
+                    <div class="button-back">
+                        <div class="button-title">Loading System</div>
+                        <div class="button-desc"> and optimize loading schedules in real-time.</div>
+                        <button class="explore-btn">Monitor System</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Button -->
+            <div class="nav-button contact" onclick="window.location.href='contact.html'">
+                <div class="button-inner">
+                    <div class="button-front">
+                        <i class="fas fa-envelope icon"></i>
+                        <div class="button-title">Contact</div>
+                        <div class="button-desc">Get in touch with us</div>
+                    </div>
+                    <div class="button-back">
+                        <div class="button-title">Contact Us</div>
+                        <div class="button-desc">Have questions? Reach out to our team via email, phone, or schedule a consultation.</div>
+                        <button class="explore-btn">Get in Touch</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Please note: this demo version is provided for testing and evaluation.</p>
+            <p style="margin-top: 0.5rem;">Made By CTM IT Department</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Add click functionality to buttons
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Get the button title
+                const title = this.querySelector('.button-title').textContent;
+                
+                // Create a visual feedback effect
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-10px)';
+                }, 150);
+                
+                // Show alert with navigation message
+                setTimeout(() => {
+                    alert(`Navigating to: ${title}\n(In a real application, this would redirect to the ${title} page.)`);
+                }, 300);
+            });
+        });
+        
+        // Add functionality to "Explore" buttons on the back of cards
+        document.querySelectorAll('.explore-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent triggering the card click event
+                
+                // Get the section name from parent
+                const section = this.closest('.button-back').querySelector('.button-title').textContent;
+                
+                // Animation for button click
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1.05)';
+                }, 100);
+                
+                // Show alert
+                setTimeout(() => {
+                    alert(`Exploring: ${section}`);
+                }, 200);
+            });
+        });
+        
+        // Add some random floating animation to background elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.bg-element');
+            elements.forEach(el => {
+                // Randomize animation duration
+                const duration = 15 + Math.random() * 10;
+                el.style.animationDuration = `${duration}s`;
+            });
+        });
+    </script>
+</body>
+</html>
